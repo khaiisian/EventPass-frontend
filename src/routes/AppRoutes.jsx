@@ -2,6 +2,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
+import Register from '../pages/Register';
 
 const ProtectedRoute = ({ children }) => {
     const token = localStorage.getItem('token');
@@ -14,6 +15,7 @@ export default function AppRoutes() {
             <Routes>
                 <Route path="/" element={<Navigate to="/login" />} /> {/* <-- redirect root */}
                 <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
                 <Route
                     path="/dashboard"
                     element={

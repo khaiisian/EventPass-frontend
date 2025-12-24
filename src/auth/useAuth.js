@@ -8,6 +8,27 @@ const UseAuth = () =>{
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
+    const register = async (form) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const res = await api.post("/auth/register", {
+                UserName: form.username,
+                Password: form.password,
+                Password_confirmation: form.passwordconfirmation,
+                PhNumber: form.phnumber,
+                Email: form.email,
+            });
+            localStorage.setItem("token", res.data.token);
+            console.log(res.data.token);
+            navigate("/dashboard");
+        } catch (error) {
+            console.log(error);
+            setError(error.response?.data?.message || 'Register failed');
+        }
+    }
+
     const login = async (email, password) => {
         setLoading(true);
         setError(null);
@@ -33,6 +54,6 @@ const UseAuth = () =>{
         navigate("/login");
     }
 
-    return {login, logout, error, loading};
+    return {login, logout, register, error, loading};
 }
 export default UseAuth
