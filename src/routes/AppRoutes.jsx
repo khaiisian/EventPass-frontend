@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
 import Register from '../pages/Register';
+import MainLayout from '../Components/Layouts/MainLayout';
 
 const ProtectedRoute = ({ children }) => {
     const token = localStorage.getItem('token');
@@ -13,17 +14,18 @@ export default function AppRoutes() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Navigate to="/login" />} /> {/* <-- redirect root */}
+                <Route path="/" element={<Navigate to="/dashboard" />} /> {/* <-- redirect root */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route
-                    path="/dashboard"
-                    element={
+
+                <Route element={<MainLayout />}>
+                    <Route path="/dashboard" element={
                         <ProtectedRoute>
                             <Dashboard />
                         </ProtectedRoute>
-                    }
-                />
+                    } />
+                </Route>
+
             </Routes>
         </Router>
     );
