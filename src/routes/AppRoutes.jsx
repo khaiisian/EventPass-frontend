@@ -4,6 +4,7 @@ import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
 import Register from '../pages/Register';
 import MainLayout from '../Components/Layouts/MainLayout';
+import UserProfile from '../pages/UserProfile';
 
 const ProtectedRoute = ({ children }) => {
     const token = localStorage.getItem('token');
@@ -24,6 +25,12 @@ export default function AppRoutes() {
                             <Dashboard />
                         </ProtectedRoute>
                     } />
+
+                    <Route path="/profile" element={
+                        <ProtectedRoute>
+                            <UserProfile />
+                        </ProtectedRoute>
+                    }/>
                 </Route>
 
             </Routes>
