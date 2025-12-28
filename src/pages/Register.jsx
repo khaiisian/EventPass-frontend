@@ -1,28 +1,27 @@
-import React from 'react'
-import {useState} from 'react'
-import useAuth from "../auth/useAuth.js";
-import App from "../App.jsx";
+// src/pages/Register.jsx
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext.jsx';
 
-export const Register = () => {
-    const {register, loading, error} = useAuth();
+const Register = () => {
+    const { register, loading, error } = useAuth();
 
     const [form, setForm] = useState({
-        username: "",
-        email: "",
-        password: "",
-        passwordconfirmation: "",
-        phnumber: ""
+        username: '',
+        email: '',
+        password: '',
+        passwordconfirmation: '',
+        phnumber: ''
     });
 
-
     const handleChange = (e) => {
-        setForm({...form, [e.target.name]: e.target.value});
-    }
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         register(form);
-    }
+    };
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-100 via-purple-100 to-slate-200">
@@ -41,80 +40,70 @@ export const Register = () => {
                 )}
 
                 <div className="mb-4">
-                    <label className="block mb-1 text-slate-700 font-medium">
-                        Username
-                    </label>
+                    <label className="block mb-1 text-slate-700 font-medium">Username</label>
                     <input
                         type="text"
                         name="username"
                         value={form.username}
                         onChange={handleChange}
                         className="w-full border border-slate-300 p-2 rounded-lg
-                               focus:outline-none focus:ring-2 focus:ring-purple-500
-                               focus:border-transparent transition"
+                       focus:outline-none focus:ring-2 focus:ring-purple-500
+                       focus:border-transparent transition"
                         required
                     />
                 </div>
 
                 <div className="mb-4">
-                    <label className="block mb-1 text-slate-700 font-medium">
-                        Phone Number
-                    </label>
+                    <label className="block mb-1 text-slate-700 font-medium">Phone Number</label>
                     <input
                         type="text"
                         name="phnumber"
                         value={form.phnumber}
                         onChange={handleChange}
                         className="w-full border border-slate-300 p-2 rounded-lg
-                               focus:outline-none focus:ring-2 focus:ring-purple-500
-                               focus:border-transparent transition"
+                       focus:outline-none focus:ring-2 focus:ring-purple-500
+                       focus:border-transparent transition"
                     />
                 </div>
 
                 <div className="mb-4">
-                    <label className="block mb-1 text-slate-700 font-medium">
-                        Email
-                    </label>
+                    <label className="block mb-1 text-slate-700 font-medium">Email</label>
                     <input
                         type="email"
                         name="email"
                         value={form.email}
                         onChange={handleChange}
                         className="w-full border border-slate-300 p-2 rounded-lg
-                               focus:outline-none focus:ring-2 focus:ring-purple-500
-                               focus:border-transparent transition"
+                       focus:outline-none focus:ring-2 focus:ring-purple-500
+                       focus:border-transparent transition"
                         required
                     />
                 </div>
 
                 <div className="mb-4">
-                    <label className="block mb-1 text-slate-700 font-medium">
-                        Password
-                    </label>
+                    <label className="block mb-1 text-slate-700 font-medium">Password</label>
                     <input
                         type="password"
                         name="password"
                         value={form.password}
                         onChange={handleChange}
                         className="w-full border border-slate-300 p-2 rounded-lg
-                               focus:outline-none focus:ring-2 focus:ring-purple-500
-                               focus:border-transparent transition"
+                       focus:outline-none focus:ring-2 focus:ring-purple-500
+                       focus:border-transparent transition"
                         required
                     />
                 </div>
 
                 <div className="mb-6">
-                    <label className="block mb-1 text-slate-700 font-medium">
-                        Confirm Password
-                    </label>
+                    <label className="block mb-1 text-slate-700 font-medium">Confirm Password</label>
                     <input
                         type="password"
                         name="passwordconfirmation"
                         value={form.passwordconfirmation}
                         onChange={handleChange}
                         className="w-full border border-slate-300 p-2 rounded-lg
-                               focus:outline-none focus:ring-2 focus:ring-purple-500
-                               focus:border-transparent transition"
+                       focus:outline-none focus:ring-2 focus:ring-purple-500
+                       focus:border-transparent transition"
                         required
                     />
                 </div>
@@ -122,20 +111,21 @@ export const Register = () => {
                 <button
                     type="submit"
                     className={`w-full p-3 rounded-lg text-white font-semibold transition
-                    ${loading
-                        ? 'bg-purple-400 cursor-not-allowed'
-                        : 'bg-purple-600 hover:bg-purple-700'}
-                `}
+                    ${loading ? 'bg-purple-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'}`}
                     disabled={loading}
                 >
                     {loading ? 'Registering...' : 'Register'}
                 </button>
+
+                <p className="mt-4 text-center text-gray-500">
+                    Already have an account?{' '}
+                    <Link to="/login" className="text-purple-500 hover:underline">
+                        Login
+                    </Link>
+                </p>
             </form>
         </div>
     );
-
-}
+};
 
 export default Register;
-
-

@@ -1,6 +1,6 @@
-// src/pages/Login.jsx
 import { useState } from 'react';
-import useAuth from '../auth/useAuth';
+import { Link } from 'react-router-dom'; // add this
+import { useAuth } from '../auth/AuthContext'; // updated import
 
 export default function Login() {
     const { login, loading, error } = useAuth();
@@ -11,6 +11,7 @@ export default function Login() {
         e.preventDefault();
         login(email, password);
     };
+
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-900">
             <form
@@ -28,9 +29,7 @@ export default function Login() {
                 )}
 
                 <div className="mb-5">
-                    <label className="block text-gray-300 mb-2 font-medium">
-                        Email
-                    </label>
+                    <label className="block text-gray-300 mb-2 font-medium">Email</label>
                     <input
                         type="email"
                         value={email}
@@ -44,9 +43,7 @@ export default function Login() {
                 </div>
 
                 <div className="mb-6">
-                    <label className="block text-gray-300 mb-2 font-medium">
-                        Password
-                    </label>
+                    <label className="block text-gray-300 mb-2 font-medium">Password</label>
                     <input
                         type="password"
                         value={password}
@@ -62,9 +59,7 @@ export default function Login() {
                 <button
                     type="submit"
                     className={`w-full p-3 rounded-lg text-white font-semibold transition
-            ${loading
-                        ? 'bg-purple-400 cursor-not-allowed'
-                        : 'bg-purple-600 hover:bg-purple-700'}`}
+            ${loading ? 'bg-purple-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'}`}
                     disabled={loading}
                 >
                     {loading ? 'Logging in...' : 'Login'}
@@ -72,17 +67,14 @@ export default function Login() {
 
                 <p className="mt-6 text-center text-gray-400">
                     Don’t have an account?{' '}
-                    <a
-                        href="/register"
+                    <Link
+                        to="/register"
                         className="text-purple-400 hover:text-purple-500 hover:underline font-medium"
                     >
                         Sign up
-                    </a>
+                    </Link>
                 </p>
             </form>
         </div>
-
     );
-
-
 }

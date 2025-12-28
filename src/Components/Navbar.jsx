@@ -1,14 +1,12 @@
 import React from 'react';
 import { Link } from "react-router-dom";
-import useAuth from '../auth/useAuth';
+import {useAuth} from "../auth/AuthContext.jsx";
 
 const Navbar = () => {
-    const token = localStorage.getItem("token");
-    const { logout } = useAuth();
+    const { user, token, logout } = useAuth();
 
     return (
         <nav className="bg-gray-800 text-gray-100 flex justify-between items-center px-6 md:px-10 py-5 shadow-2xl">
-            {/* Logo */}
             <Link
                 to="/"
                 className="font-bold text-3xl md:text-4xl hover:text-cyan-400 transition-colors duration-300"
@@ -16,7 +14,6 @@ const Navbar = () => {
                 EventPass
             </Link>
 
-            {/* Links */}
             <div className="flex gap-4 md:gap-6 text-lg font-semibold items-center">
                 {token ? (
                     <>
@@ -30,7 +27,7 @@ const Navbar = () => {
                             to="/profile"
                             className="hover:text-cyan-400 transition-colors duration-300"
                         >
-                            UserProfile
+                            {user?.UserName || 'UserProfile'}
                         </Link>
                         <button
                             onClick={logout}

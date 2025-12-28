@@ -1,19 +1,22 @@
-// src/routes/AppRoutes.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
 import Register from '../pages/Register';
 import MainLayout from '../Components/Layouts/MainLayout';
 import UserProfile from '../pages/UserProfile';
+import {useAuth} from "../auth/AuthContext.jsx";
 
 const ProtectedRoute = ({ children }) => {
-    const token = localStorage.getItem('token');
-    return token ? children : <Navigate to="/login" />;
+    const { user, loadingUser } = useAuth();
+
+    if (loadingUser) return <div>Loading...</div>; // wait for fetchUser
+
+    return user ? children : <Navigate to="/login" replace />;
 };
+
 
 export default function AppRoutes() {
     return (
-        <Router>
             <Routes>
                 <Route path="/" element={<Navigate to="/dashboard" />} /> {/* <-- redirect root */}
                 <Route path="/login" element={<Login />} />
@@ -32,8 +35,6 @@ export default function AppRoutes() {
                         </ProtectedRoute>
                     }/>
                 </Route>
-
             </Routes>
-        </Router>
     );
 }
