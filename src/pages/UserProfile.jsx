@@ -50,19 +50,17 @@ const UserProfile = () => {
                             </div>
                         </div>
 
-                        <div className="md:w-2/5 p-6 md:p-8 border-r border-gray-200">
+                        <div className="md:w-2/5 p-6 md:p-8">
                             <div className="w-35">
-                                <div className="mt-3 w-35 h-35 rounded-full bg-gray-200 relative cursor-pointer">
-                                    <span className="absolute bottom-0 right-3 bg-white p-1 rounded-full shadow border border-gray-200 w-8 h-8 flex items-center justify-center">
-                                      ✎
-                                    </span>
-                                </div>
-
-                                <p className="mt-3 text-center font-bold">{user.UserName}</p>
-                                <p className="text-sm text-gray-500">{user.Email}</p>
+                                <label className="mt-3 w-36 h-36 rounded-full bg-gray-200 relative cursor-pointer flex items-center justify-center">
+                                    {/* Display selected image or existing user image */}
+                                    <img
+                                        src={user?.ProfileImg}
+                                        alt="Profile"
+                                        className="w-full h-full object-cover rounded-full"
+                                    />
+                                </label>
                             </div>
-
-
                         </div>
                         {/*<div className="md:w-2/5 p-6 md:p-8 border-r border-gray-200">*/}
                         {/*    <div className="mb-6">*/}

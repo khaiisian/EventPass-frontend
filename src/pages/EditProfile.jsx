@@ -26,6 +26,8 @@ const EditProfile = () => {
     const [userInfoSuccess, setUserInfoSuccess] = useState(null);
     const [passwordSuccess, setPasswordSuccess] = useState(null);
 
+    const [profileImg, setProfileImg] = useState(null);
+
     useEffect(() => {
         if (user) {
             setUserInfoForm({
@@ -53,7 +55,23 @@ const EditProfile = () => {
         setUserInfoSuccess(null);
 
         try {
-            const res = await api.put(`/users/${user.UserId}`, userInfoForm);
+            const formData = new FormData();
+            formData.append('UserName', userInfoForm.UserName);
+            formData.append('Email', userInfoForm.Email);
+            formData.append('PhNumber', userInfoForm.PhNumber);
+
+            if (profileImg) {
+                formData.append('ProfileImg', profileImg);
+            }
+
+            const res = await api.post('/users/1?_method=PUT', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data', // Axios will handle boundary automatically
+                },
+            });
+
+
+            console.log("Result => "+ res);
 
             if (!res.data.status) {
                 setUserInfoError(res.data.message || "Update Failed.");
@@ -113,6 +131,35 @@ const EditProfile = () => {
                         <h2 className="text-lg font-medium text-gray-900">Profile Information</h2>
                         <p className="text-sm text-gray-600 mt-1">Update your account's profile information and email address.</p>
                     </header>
+
+                    <div className="md:w-2/5 p-6 md:p-8">
+                        <div className="w-35">
+                            <label className="mt-3 w-36 h-36 rounded-full bg-gray-200 relative cursor-pointer flex items-center justify-center">
+                                {/* Display selected image or existing user image */}
+                                <img
+                                    src={
+                                        profileImg
+                                            ? URL.createObjectURL(profileImg) // selected file preview
+                                            : user?.ProfileImg // existing image from user object
+                                    }
+                                    alt="Profile"
+                                    className="w-full h-full object-cover rounded-full"
+                                />
+
+                                <span className="absolute bottom-2 right-2 bg-white p-1.5 rounded-full shadow border border-gray-200 w-9 h-9 flex items-center justify-center">
+                                        ✎
+                                    </span>
+
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => setProfileImg(e.target.files[0])}
+                                />
+                            </label>
+                        </div>
+                    </div>
+
 
                     {userInfoError && <div className="text-red-600 mb-4">{userInfoError}</div>}
                     {userInfoSuccess && <div className="text-green-600 mb-4">{userInfoSuccess}</div>}
