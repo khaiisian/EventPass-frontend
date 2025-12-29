@@ -16,12 +16,15 @@ export const AuthProvider = ({ children }) => {
         if(token){
             api.defaults.headers.Authorization = `Bearer ${token}`;
             fetchUser();
+        } else {
+            setLoadingUser(false);
         }
     }, [token]);
 
     const fetchUser = async () => {
         setLoadingUser(true);
         try {
+            console.log("Fetching user...");
             const res = await api.get("/auth/me");
             setUser(res.data.user);
             console.log(res.data.user);
@@ -31,6 +34,13 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setLoadingUser(false);
         }
+    };
+
+    const updateUserInfo = (updatedData) => {
+        setUser(prev => ({
+            ...prev,
+            ...updatedData
+        }));
     };
 
     const register = async (form) => {
@@ -95,7 +105,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, fetchUser, loadingUser }}>
+        <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, fetchUser, loadingUser, updateUserInfo }}>
             {children}
         </AuthContext.Provider>
     );

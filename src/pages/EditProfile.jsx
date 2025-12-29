@@ -3,7 +3,7 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import api from "../api/axios.js";
 
 const EditProfile = () => {
-    const { user, fetchUser } = useAuth();
+    const { user, fetchUser, updateUserInfo } = useAuth();
 
     const [userInfoForm, setUserInfoForm] = useState({
         UserName: "",
@@ -60,7 +60,9 @@ const EditProfile = () => {
                 return;
             }
 
-            await fetchUser();
+            if (res.data.data) {
+                updateUserInfo(res.data.data);  // This updates immediately
+            }
             setUserInfoSuccess(res.data.message);
 
             setTimeout(() => setUserInfoSuccess(null), 4000);
