@@ -4,6 +4,7 @@ import Dashboard from '../pages/Dashboard';
 import Register from '../pages/Register';
 import MainLayout from '../Components/Layouts/MainLayout';
 import UserProfile from '../pages/UserProfile';
+import EditProfile from '../pages/EditProfile';
 import {useAuth} from "../auth/AuthContext.jsx";
 
 const ProtectedRoute = ({ children }) => {
@@ -32,6 +33,12 @@ export default function AppRoutes() {
                     <Route path="/profile" element={
                         <ProtectedRoute>
                             <UserProfile />
+                        </ProtectedRoute>
+                    }/>
+
+                    <Route path="/editprofile" element={
+                        <ProtectedRoute>
+                            <EditProfile />
                         </ProtectedRoute>
                     }/>
                 </Route>

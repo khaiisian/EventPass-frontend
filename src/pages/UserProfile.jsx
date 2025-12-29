@@ -1,6 +1,15 @@
 import React from 'react'
+import {useAuth} from "../auth/AuthContext.jsx";
+import {useNavigate} from "react-router-dom";
 
 const UserProfile = () => {
+    const {user} = useAuth();
+    const navigate = useNavigate();
+
+    const goEditProfile = () => {
+        navigate("/editprofile");
+    }
+    
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
             <div className="w-2/6 mx-auto shadow-md rounded-xl border border-gray-200 overflow-hidden">
@@ -13,29 +22,29 @@ const UserProfile = () => {
                             <div className="space-y-6">
                                 <div>
                                     <p className="text-sm text-gray-500 mb-1">User Code</p>
-                                    <p className="text-gray-800 font-medium">ADM00858</p>
+                                    <p className="text-gray-800 font-medium">{user.UserCode}</p>
                                 </div>
 
                                 <div>
                                     <p className="text-sm text-gray-500 mb-1">Name</p>
-                                    <p className="text-gray-800 font-medium">your name</p>
+                                    <p className="text-gray-800 font-medium">{user.UserName}</p>
                                 </div>
 
                                 <div>
                                     <p className="text-sm text-gray-500 mb-1">Email</p>
-                                    <p className="text-gray-800 font-medium">yourname@gmail.com</p>
+                                    <p className="text-gray-800 font-medium">{user.Email}</p>
                                 </div>
 
                                 <div>
-                                    <p className="text-sm text-gray-500 mb-1">Mobile</p>
+                                    <p className="text-sm text-gray-500 mb-1">Phone Number</p>
                                     <div className="flex items-center">
-                                        09797364592
+                                        {user.PhNumber}
                                     </div>
                                 </div>
                             </div>
 
                             <div className="mt-8 pt-6 border-t border-gray-200">
-                                <button className="w-2/4 bg-cyan-500 hover:bg-cyan-600 text-white font-medium py-2.5 px-4 rounded-md transition-colors duration-200 cursor-pointer">
+                                <button onClick={goEditProfile} className="w-2/4 bg-cyan-500 hover:bg-cyan-600 text-white font-medium py-2.5 px-4 rounded-md transition-colors duration-200 cursor-pointer">
                                     Edit Profile
                                 </button>
                             </div>
@@ -49,8 +58,8 @@ const UserProfile = () => {
                                     </span>
                                 </div>
 
-                                <p className="mt-3 text-center font-bold">Your Name</p>
-                                <p className="text-sm text-gray-500">example@gmail.com</p>
+                                <p className="mt-3 text-center font-bold">{user.UserName}</p>
+                                <p className="text-sm text-gray-500">{user.Email}</p>
                             </div>
 
 

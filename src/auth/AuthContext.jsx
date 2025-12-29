@@ -24,6 +24,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const res = await api.get("/auth/me");
             setUser(res.data.user);
+            console.log(res.data.user);
         } catch (err) {
             console.log(err);
             logout();
@@ -94,7 +95,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, loadingUser }}>
+        <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, fetchUser, loadingUser }}>
             {children}
         </AuthContext.Provider>
     );
