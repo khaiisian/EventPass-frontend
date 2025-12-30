@@ -12,11 +12,24 @@ const UserProfile = () => {
     
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-            <div className="w-2/6 mx-auto shadow-md rounded-xl border border-gray-200 overflow-hidden">
+            <div className="w-2/7 mx-auto shadow-md rounded-xl border border-gray-200 overflow-hidden">
 
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                     <div className="md:flex">
-                        <div className="md:w-3/5 p-6 md:p-8 bg-gray-50">
+                        <div className="md:w-3/6 p-6 md:p-8">
+                            <div className="w-35">
+                                <label className="mt-3 w-36 h-36 rounded-full bg-gray-200 relative cursor-pointer flex items-center justify-center">
+                                    {/* Display selected image or existing user image */}
+                                    <img
+                                        src={user?.ProfileImg}
+                                        alt="Profile"
+                                        className="w-full h-full object-cover rounded-full"
+                                    />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="md:w-3/6 p-6 md:p-8 bg-white">
                             <h1 className="text-2xl font-bold text-gray-800 mb-8">Profile Settings</h1>
 
                             <div className="space-y-6">
@@ -50,18 +63,6 @@ const UserProfile = () => {
                             </div>
                         </div>
 
-                        <div className="md:w-2/5 p-6 md:p-8">
-                            <div className="w-35">
-                                <label className="mt-3 w-36 h-36 rounded-full bg-gray-200 relative cursor-pointer flex items-center justify-center">
-                                    {/* Display selected image or existing user image */}
-                                    <img
-                                        src={user?.ProfileImg}
-                                        alt="Profile"
-                                        className="w-full h-full object-cover rounded-full"
-                                    />
-                                </label>
-                            </div>
-                        </div>
                         {/*<div className="md:w-2/5 p-6 md:p-8 border-r border-gray-200">*/}
                         {/*    <div className="mb-6">*/}
                         {/*        <h2 className="text-lg font-semibold text-gray-800">Your name</h2>*/}

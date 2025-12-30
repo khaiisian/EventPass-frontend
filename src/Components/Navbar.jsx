@@ -24,7 +24,7 @@ const Navbar = () => {
                             Dashboard
                         </Link>
                         <Link
-                            to="/profile"
+                            to="/editprofile"
                             className="hover:text-cyan-400 transition-colors duration-300"
                         >
                             {user?.UserName || 'UserProfile'}

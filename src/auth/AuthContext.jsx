@@ -86,6 +86,20 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+    const refreshToken = async () => {
+        try {
+            const res = await api.post("/auth/refresh");
+            const newToken = res.data.token;
+            localStorage.setItem("token", newToken);
+            setToken(newToken);
+            api.defaults.headers.Authorization = `Bearer ${newToken}`;
+            return newToken;
+        } catch (err) {
+            logout(); // if refresh fails, force logout
+            return null;
+        }
+    };
+
     const logout = async () => {
         setLoading(true);
         setError(null);
@@ -105,7 +119,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, fetchUser, loadingUser, updateUserInfo }}>
+        <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, fetchUser, loadingUser, updateUserInfo, refreshToken }}>
             {children}
         </AuthContext.Provider>
     );

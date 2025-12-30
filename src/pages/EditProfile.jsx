@@ -3,7 +3,7 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import api from "../api/axios.js";
 
 const EditProfile = () => {
-    const { user, fetchUser, updateUserInfo } = useAuth();
+    const { user, fetchUser, updateUserInfo, logout } = useAuth();
 
     const [userInfoForm, setUserInfoForm] = useState({
         UserName: "",
@@ -118,6 +118,22 @@ const EditProfile = () => {
             setPasswordLoading(false);
         }
     };
+
+    const handleDeleteAccount = async () => {
+        const confirmDelete = window.confirm(
+            "Are you sure to delete your account?",
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+            await api.delete('/users/me');
+            await logout();
+        } catch (err) {
+            alert(err.response?.data?.message || "Failed to delete account");
+        }
+    };
+
 
     return (
         <div className="min-h-screen bg-gray-100 py-12">
@@ -273,10 +289,12 @@ const EditProfile = () => {
 
                     <button
                         type="button"
+                        onClick={handleDeleteAccount}
                         className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
                     >
                         Delete Account
                     </button>
+
                 </section>
             </div>
         </div>
