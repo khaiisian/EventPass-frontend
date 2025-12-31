@@ -64,9 +64,9 @@ const EditProfile = () => {
                 formData.append('ProfileImg', profileImg);
             }
 
-            const res = await api.post('/users/1?_method=PUT', formData, {
+            const res = await api.post(`/users?_method=PUT`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data', // Axios will handle boundary automatically
+                    'Content-Type': 'multipart/form-data',
                 },
             });
 

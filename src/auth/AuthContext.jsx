@@ -69,34 +69,30 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         setLoading(true);
         setError(null);
-        try{
+        try {
             const res = await api.post("/auth/login", {
                 Email: email,
                 Password: password,
             });
+
             localStorage.setItem('token', res.data.token);
             setToken(res.data.token);
-            await fetchUser();
-            navigate("/dashboard");
-        } catch(err){
+
+            // Fetch the user immediately and get the result
+            const userRes = await api.get("/auth/me");
+            setUser(userRes.data.user);
+
+            // Navigate based on role
+            if (userRes.data.user.Role === "ADMIN") {
+                navigate("/admin/dashboard");
+            } else {
+                navigate("/dashboard");
+            }
+        } catch (err) {
             console.log(err);
             setError(err.response?.data?.message || "Login Failed");
         } finally {
             setLoading(false);
-        }
-    }
-
-    const refreshToken = async () => {
-        try {
-            const res = await api.post("/auth/refresh");
-            const newToken = res.data.token;
-            localStorage.setItem("token", newToken);
-            setToken(newToken);
-            api.defaults.headers.Authorization = `Bearer ${newToken}`;
-            return newToken;
-        } catch (err) {
-            logout(); // if refresh fails, force logout
-            return null;
         }
     };
 
@@ -118,8 +114,10 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+
+
     return (
-        <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, fetchUser, loadingUser, updateUserInfo, refreshToken }}>
+        <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, fetchUser, loadingUser, updateUserInfo }}>
             {children}
         </AuthContext.Provider>
     );
