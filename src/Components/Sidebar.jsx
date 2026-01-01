@@ -36,6 +36,10 @@ const Sidebar = () => {
                 <Link to="/admin/events" className={linkClass('/admin/events')}>
                     Events
                 </Link>
+
+                <Link to="/admin/venuetypes" className={linkClass('/admin/venuetypes')}>
+                    Venue Types
+                </Link>
             </nav>
 
             {/* Footer */}

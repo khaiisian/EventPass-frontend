@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { getUserById, updateUser } from "../../../api/userService.js.jsx";
+import { getUserById, updateUser } from "../../../api/userService.js";
 
 const EditUser = () => {
     const { id } = useParams();

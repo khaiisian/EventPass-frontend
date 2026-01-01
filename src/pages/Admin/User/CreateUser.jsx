@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom'; // ✅ Link must be imported
-import { createUser } from "../../../api/userService.js.jsx";
+import { createUser } from "../../../api/userService.js";
 
 export const CreateUser = () => {
     const navigate = useNavigate();
