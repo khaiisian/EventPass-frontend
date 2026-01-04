@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from "../auth/AuthContext.jsx";
-import api from "../api/axios.js";
+import { useAuth } from "../../../auth/AuthContext.jsx";
+import api from "../../../api/axios.js";
 
 const EditProfile = () => {
     const { user, fetchUser, updateUserInfo, logout } = useAuth();

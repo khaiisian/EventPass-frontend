@@ -1,7 +1,7 @@
 // src/pages/Register.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../auth/AuthContext.jsx';
+import { useAuth } from '../../auth/AuthContext.jsx';
 
 const Register = () => {
     const { register, loading, error } = useAuth();

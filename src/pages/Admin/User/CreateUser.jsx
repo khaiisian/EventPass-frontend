@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // ✅ Link must be imported
+import { useNavigate, Link } from 'react-router-dom';
 import { createUser } from "../../../api/userService.js";
 
 export const CreateUser = () => {
