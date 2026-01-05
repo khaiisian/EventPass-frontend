@@ -25,7 +25,6 @@ const Sidebar = () => {
 
     return (
         <aside className="w-64 min-h-screen bg-gray-900 flex flex-col shadow-2xl border-r border-gray-800">
-            {/* Brand & User Info */}
             <div className="px-6 py-6 border-b border-gray-800">
                 <h1 className="text-3xl font-extrabold text-purple-500 tracking-wide">
                     EventPass
@@ -34,7 +33,6 @@ const Sidebar = () => {
                     Admin Panel
                 </p>
 
-                {/* User Info */}
                 {user && (
                     <div className="mt-4 pt-4 border-t border-gray-800">
                         <div className="flex items-center gap-3">
@@ -53,7 +51,6 @@ const Sidebar = () => {
                                 )}
                             </div>
 
-                            {/* User Details */}
                             <div className="flex-1 min-w-0">
                                 <p className="text-white font-medium text-sm truncate">
                                     {user.UserName}

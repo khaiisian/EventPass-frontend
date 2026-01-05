@@ -97,7 +97,7 @@ export const EditVenue = () => {
             const res = await updateVenue(id, formData);
             console.log(res.data);
 
-            // navigate("/admin/venues");
+            navigate("/admin/venues");
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || "Failed to update venue");
@@ -119,7 +119,6 @@ export const EditVenue = () => {
     return (
         <div className="px-4 sm:px-6 lg:px-8 py-6">
             <div className="mt-6 border border-gray-200 shadow-xl rounded-2xl overflow-hidden bg-white p-6 md:p-8 max-w-4xl mx-auto">
-                {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-6 border-b border-gray-100">
                     <div className="mb-4 sm:mb-0">
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Edit Venue</h1>
@@ -136,17 +135,14 @@ export const EditVenue = () => {
                     </Link>
                 </div>
 
-                {/* Error Message */}
                 {error && (
                     <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
                         {error}
                     </div>
                 )}
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Venue Name Field */}
                         <div className="space-y-2">
                             <label htmlFor="VenueName" className="block font-medium text-gray-700">
                                 Venue Name
@@ -162,7 +158,6 @@ export const EditVenue = () => {
                             />
                         </div>
 
-                        {/* Venue Type Field */}
                         <div className="space-y-2">
                             <label htmlFor="VenueTypeId" className="block font-medium text-gray-700">
                                 Venue Type
@@ -194,7 +189,6 @@ export const EditVenue = () => {
                             </div>
                         </div>
 
-                        {/* Address Field */}
                         <div className="space-y-2">
                             <label htmlFor="Address" className="block font-medium text-gray-700">
                                 Address
@@ -210,7 +204,6 @@ export const EditVenue = () => {
                             />
                         </div>
 
-                        {/* Capacity Field */}
                         <div className="space-y-2">
                             <label htmlFor="Capacity" className="block font-medium text-gray-700">
                                 Capacity
@@ -227,7 +220,6 @@ export const EditVenue = () => {
                             />
                         </div>
 
-                        {/* Description Field - Full width */}
                         <div className="md:col-span-2 space-y-2">
                             <label htmlFor="Description" className="block font-medium text-gray-700">
                                 Description
@@ -244,7 +236,6 @@ export const EditVenue = () => {
                         </div>
                     </div>
 
-                    {/* Venue Image - Square Selection */}
                     <div className="space-y-4 pt-4 border-t border-gray-100">
                         <label className="block font-medium text-gray-700">
                             Venue Image
@@ -264,7 +255,6 @@ export const EditVenue = () => {
                                         />
                                     </div>
 
-                                    {/* Upload Button */}
                                     <label
                                         htmlFor="VenueImage"
                                         className="absolute -bottom-2 -right-2 bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full cursor-pointer shadow-lg transition-colors"
@@ -291,7 +281,6 @@ export const EditVenue = () => {
                         </div>
                     </div>
 
-                    {/* Form Actions */}
                     <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-100">
                         <Link
                             to="/admin/venues"
