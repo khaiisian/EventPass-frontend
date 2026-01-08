@@ -1,6 +1,9 @@
 import api from "./axios.js";
 
-export const getVenueTypes = () => api.get("/venuetypes");
+// export const getVenueTypes = () => api.get("/venuetypes");
+
+export const getVenueTypes = (params = {}) =>
+    api.get("/venuetypes", { params });
 
 export const getVenueTypeById = (id) => api.get(`/venuetypes/${id}`);
 

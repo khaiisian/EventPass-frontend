@@ -33,6 +33,20 @@ const Navbar = () => {
                         </Link>
 
                         <Link
+                            to="/venues"
+                            className="px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-purple-400 transition-colors"
+                        >
+                            Venues
+                        </Link>
+
+                        <Link
+                            to="/events"
+                            className="px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-purple-400 transition-colors"
+                        >
+                            Events
+                        </Link>
+
+                        <Link
                             to="/editprofile"
                             className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-purple-400 transition-colors"
                         >

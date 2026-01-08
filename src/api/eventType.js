@@ -1,6 +1,9 @@
 import api from "./axios.js";
 
-export const getEventTypes = () => api.get("/eventtypes");
+// export const getEventTypes = () => api.get("/eventtypes");
+
+export const getEventTypes = (params = {}) =>
+    api.get("/eventtypes", { params });
 
 export const getEventTypeById = (id) => api.get(`/eventtypes/${id}`);
 

@@ -29,6 +29,8 @@ import { OrganizerList } from "../pages/Admin/Organizer/OrganizerList.jsx";
 import { CreateOrganizer } from "../pages/Admin/Organizer/CreateOrganizer.jsx";
 import { EditOrganizer } from "../pages/Admin/Organizer/EditOrganizer.jsx";
 import {HomePage} from "../pages/Customer/HomePage/HomePage.jsx";
+import {EventPage} from "../pages/Customer/EventPage/EventPage.jsx";
+import {VenuePage} from "../pages/Customer/VenuePage/VenuePage.jsx";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { user, loadingUser } = useAuth();
@@ -52,6 +54,8 @@ export default function AppRoutes() {
                 <Route path="/profile" element={<UserProfile />} />
                 <Route path="/editprofile" element={<EditProfile />} />
                 <Route path="/homepage" element={<HomePage />} />
+                <Route path="/events" element={<EventPage />} />
+                <Route path="/venues" element={<VenuePage />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminLayout /></ProtectedRoute>}>

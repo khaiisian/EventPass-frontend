@@ -1,6 +1,15 @@
 import api from "./axios.js";
 
-export const getEvents = () => api.get("/events");
+// export const getEvents = (page = 1, perPage = 10) =>
+//     api.get("/events", {
+//         params: {
+//             page,
+//             per_page: perPage,
+//         },
+//     });
+
+export const getEvents = (params = {}) =>
+    api.get("/events", { params });
 
 export const getEventById = (id) => api.get(`/events/${id}`);
 

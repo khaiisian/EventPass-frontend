@@ -1,6 +1,9 @@
 import api from "./axios.js";
 
-export const getOrganizers = () => api.get("/organizers");
+// export const getOrganizers = () => api.get("/organizers");
+
+export const getOrganizers = (params = {}) =>
+    api.get("/organizers", { params });
 
 export const getOrganizerById = (id) => api.get(`/organizers/${id}`);
 

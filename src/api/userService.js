@@ -1,6 +1,9 @@
 import api from "../api/axios";
 
-export const getUsers = () => api.get("/users");
+// export const getUsers = () => api.get("/users");
+
+export const getUsers = (params = {}) =>
+    api.get("/users", { params });
 
 export const getUserById = (id) => api.get(`/users/${id}`);
 

@@ -27,8 +27,8 @@ export const EditEvent = () => {
         IsActive: true,
         EventStatus: "0",
         TotalTicketQuantity: 0,
-        EventImage: null, // For new file upload
-        ExistingEventImage: null, // For displaying existing image
+        EventImage: null,
+        ExistingEventImage: null,
     });
 
     useEffect(() => {
