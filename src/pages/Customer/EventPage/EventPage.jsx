@@ -245,47 +245,46 @@ export const EventPage = () => {
                                 const isSoldOut = availableTickets <= 0;
 
                                 return (
-                                    <Link
-                                        key={event.EventId}
-                                        to={`/events/${event.EventId}`}
-                                        className="group"
-                                    >
+                                    <div key={event.EventId} className="group">
                                         <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                                            {/* Event Image */}
-                                            <div className="relative h-56 overflow-hidden">
-                                                <img
-                                                    src={getEventImage(event)}
-                                                    alt={event.EventName}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                />
+                                            {/* Event Image - Clickable */}
+                                            <Link to={`/events/${event.EventId}/details`}>
+                                                <div className="relative h-56 overflow-hidden">
+                                                    <img
+                                                        src={getEventImage(event)}
+                                                        alt={event.EventName}
+                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                    />
 
-                                                {/* Category Badge (Same for all events) */}
-                                                <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor()}`}>
-                                                    {getCategoryIcon()} {event.EventType?.EventTypeName}
+                                                    {/* Category Badge (Same for all events) */}
+                                                    <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor()}`}>
+                                                        {getCategoryIcon()} {event.EventType?.EventTypeName}
+                                                    </div>
+
+                                                    {/* Sold Out Badge */}
+                                                    {isSoldOut && (
+                                                        <div className="absolute top-3 right-3 px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full">
+                                                            Sold Out!
+                                                        </div>
+                                                    )}
+
+                                                    {/* Almost Sold Out Badge */}
+                                                    {isAlmostSoldOut && (
+                                                        <div className="absolute top-3 right-3 px-3 py-1 bg-orange-600 text-white text-xs font-bold rounded-full">
+                                                            Almost Sold Out!
+                                                        </div>
+                                                    )}
                                                 </div>
-
-                                                {/* Sold Out Badge */}
-                                                {isSoldOut && (
-                                                    <div className="absolute top-3 right-3 px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full">
-                                                        Sold Out!
-                                                    </div>
-                                                )}
-
-                                                {/* Almost Sold Out Badge */}
-                                                {isAlmostSoldOut && (
-                                                    <div className="absolute top-3 right-3 px-3 py-1 bg-orange-600 text-white text-xs font-bold rounded-full">
-                                                        Almost Sold Out!
-                                                    </div>
-                                                )}
-                                            </div>
+                                            </Link>
 
                                             {/* Event Details */}
                                             <div className="p-6">
-                                                <div className="flex justify-between items-start mb-3">
+                                                {/* Event Name - Clickable */}
+                                                <Link to={`/events/${event.EventId}/details`} className="block mb-3">
                                                     <h3 className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-2">
                                                         {event.EventName}
                                                     </h3>
-                                                </div>
+                                                </Link>
 
                                                 {/* Date and Time */}
                                                 <div className="flex items-center gap-3 text-gray-600 mb-4">
@@ -330,21 +329,21 @@ export const EventPage = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* View Button */}
-                                                    <button
-                                                        disabled={isSoldOut}
-                                                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                                    {/* View Button - Only clickable if not sold out */}
+                                                    <Link
+                                                        to={isSoldOut ? '#' : `/events/${event.EventId}/details`}
+                                                        className={`inline-block px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                                                             isSoldOut
-                                                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none'
                                                                 : 'bg-purple-600 text-white hover:bg-purple-700'
                                                         }`}
                                                     >
                                                         {isSoldOut ? 'Sold Out' : 'View Details'}
-                                                    </button>
+                                                    </Link>
                                                 </div>
                                             </div>
                                         </div>
-                                    </Link>
+                                    </div>
                                 );
                             })}
                         </div>
