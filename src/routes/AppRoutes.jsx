@@ -33,6 +33,7 @@ import {EventPage} from "../pages/Customer/EventPage/EventPage.jsx";
 import {VenuePage} from "../pages/Customer/VenuePage/VenuePage.jsx";
 import {EventDetails} from "../pages/Customer/EventPage/EventDetails.jsx";
 import {CheckoutPage} from "../pages/Customer/Checkout/CheckoutPage.jsx";
+import {VenueDetails} from "../pages/Customer/VenuePage/VenueDetailPage.jsx";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { user, loadingUser } = useAuth();
@@ -58,6 +59,7 @@ export default function AppRoutes() {
                 <Route path="/homepage" element={<HomePage />} />
                 <Route path="/events" element={<EventPage />} />
                 <Route path="/venues" element={<VenuePage />} />
+                <Route path='/venues/:id/details' element={<VenueDetails />} />
                 <Route path='/events/:id/details' element={<EventDetails />} />
                 <Route path='/checkout' element={<CheckoutPage />} />
             </Route>

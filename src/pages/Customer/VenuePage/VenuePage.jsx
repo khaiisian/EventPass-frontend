@@ -13,7 +13,6 @@ export const VenuePage = () => {
         total: 0
     });
 
-    // UI-only states (no functionality)
     const [searchTerm, setSearchTerm] = useState('');
     const [activeFilter, setActiveFilter] = useState('all');
     const [sortBy, setSortBy] = useState('name');
@@ -35,7 +34,6 @@ export const VenuePage = () => {
         { id: 'newest', name: 'Newest' }
     ];
 
-    // Fetch venues on component mount
     useEffect(() => {
         fetchVenues();
     }, []);
@@ -61,48 +59,18 @@ export const VenuePage = () => {
         }
     };
 
-    // Pagination handlers
     const handlePageChange = (page) => {
         if (page >= 1 && page <= pagination.last_page && page !== pagination.current_page) {
             fetchVenues(page);
         }
     };
 
-    // Helper functions
     const formatCapacity = (capacity) => {
         if (!capacity) return '0';
         if (capacity >= 1000) {
             return `${(capacity / 1000).toFixed(1)}k`;
         }
         return capacity.toLocaleString();
-    };
-
-    const getVenueTypeIcon = (venueType) => {
-        const icons = {
-            'Stadium': '🏟️',
-            'Convention Center': '🏢',
-            'Arena': '🏟️',
-            'Theater': '🎭',
-            'Outdoor Venue': '🌳',
-            'Conference Hall': '💼',
-            'Club': '🎵',
-            'Auditorium': '🎪'
-        };
-        return icons[venueType] || '📍';
-    };
-
-    const getVenueTypeColor = (venueType) => {
-        const colors = {
-            'Stadium': 'bg-blue-100 text-blue-700',
-            'Convention Center': 'bg-green-100 text-green-700',
-            'Arena': 'bg-purple-100 text-purple-700',
-            'Theater': 'bg-red-100 text-red-700',
-            'Outdoor Venue': 'bg-emerald-100 text-emerald-700',
-            'Conference Hall': 'bg-amber-100 text-amber-700',
-            'Club': 'bg-pink-100 text-pink-700',
-            'Auditorium': 'bg-indigo-100 text-indigo-700'
-        };
-        return colors[venueType] || 'bg-gray-100 text-gray-700';
     };
 
     // Get fallback image if VenueImage is null
@@ -246,12 +214,8 @@ export const VenuePage = () => {
                                 const venueType = venue.venueType?.VenueTypeName || 'Unknown';
 
                                 return (
-                                    <Link
-                                        key={venue.VenueId}
-                                        to={`/venues/${venue.VenueId}`}
-                                        className="group"
-                                    >
-                                        <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                                    <div key={venue.VenueId} className="group">
+                                        <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
                                             {/* Venue Image */}
                                             <div className="relative h-56 overflow-hidden">
                                                 <img
@@ -261,8 +225,8 @@ export const VenuePage = () => {
                                                 />
 
                                                 {/* Venue Type Badge */}
-                                                <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-sm font-medium ${getVenueTypeColor(venueType)}`}>
-                                                    {getVenueTypeIcon(venueType)} {venueType}
+                                                <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                                                    {venueType}
                                                 </div>
 
                                                 {/* Capacity Badge */}
@@ -274,7 +238,7 @@ export const VenuePage = () => {
                                             {/* Venue Details */}
                                             <div className="p-6">
                                                 <div className="flex justify-between items-start mb-3">
-                                                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                                    <h3 className="text-xl font-bold text-gray-900">
                                                         {venue.VenueName}
                                                     </h3>
                                                     <div className="flex items-center gap-1 text-gray-600">
@@ -300,7 +264,7 @@ export const VenuePage = () => {
                                                 </div>
 
                                                 {/* Venue Code and Capacity */}
-                                                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                                                <div className="flex items-center justify-between pt-4 border-t border-gray-100 mb-4">
                                                     <div>
                                                         <div className="text-sm font-medium text-gray-900">
                                                             {venue.VenueCode}
@@ -311,7 +275,7 @@ export const VenuePage = () => {
                                                     </div>
 
                                                     <div className="text-right">
-                                                        <div className="text-lg font-bold text-blue-600">
+                                                        <div className="text-lg font-bold text-gray-900">
                                                             {venue.Capacity?.toLocaleString()}
                                                         </div>
                                                         <div className="text-xs text-gray-500">
@@ -319,9 +283,22 @@ export const VenuePage = () => {
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                {/* View Details Button */}
+                                                <div className="border-t border-gray-100 pt-4">
+                                                    <Link
+                                                        to={`/venues/${venue.VenueId}/details`}
+                                                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        View Details
+                                                    </Link>
+                                                </div>
                                             </div>
                                         </div>
-                                    </Link>
+                                    </div>
                                 );
                             })}
                         </div>
