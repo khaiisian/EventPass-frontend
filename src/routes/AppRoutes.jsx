@@ -34,6 +34,8 @@ import {VenuePage} from "../pages/Customer/VenuePage/VenuePage.jsx";
 import {EventDetails} from "../pages/Customer/EventPage/EventDetails.jsx";
 import {CheckoutPage} from "../pages/Customer/Checkout/CheckoutPage.jsx";
 import {VenueDetails} from "../pages/Customer/VenuePage/VenueDetailPage.jsx";
+import {TransactionList} from "../pages/Admin/Transaction/TransactionList.jsx";
+import {TransactionDetail} from "../pages/Admin/Transaction/TransactionDetail.jsx";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { user, loadingUser } = useAuth();
@@ -90,6 +92,9 @@ export default function AppRoutes() {
                 <Route path="/admin/organizers" element={<OrganizerList />} />
                 <Route path="/admin/organizers/create" element={<CreateOrganizer />} />
                 <Route path="/admin/organizers/:id/edit" element={<EditOrganizer />} />
+
+                <Route path='/admin/transactions' element={<TransactionList />} />
+                <Route path="/admin/transactions/:id" element={<TransactionDetail />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
