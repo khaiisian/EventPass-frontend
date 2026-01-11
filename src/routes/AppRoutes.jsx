@@ -32,10 +32,12 @@ import {HomePage} from "../pages/Customer/HomePage/HomePage.jsx";
 import {EventPage} from "../pages/Customer/EventPage/EventPage.jsx";
 import {VenuePage} from "../pages/Customer/VenuePage/VenuePage.jsx";
 import {EventDetails} from "../pages/Customer/EventPage/EventDetails.jsx";
-import {CheckoutPage} from "../pages/Customer/Checkout/CheckoutPage.jsx";
+import {CheckoutPage} from "../pages/Customer/CheckoutPage/CheckoutPage.jsx";
 import {VenueDetails} from "../pages/Customer/VenuePage/VenueDetailPage.jsx";
 import {TransactionList} from "../pages/Admin/Transaction/TransactionList.jsx";
 import {TransactionDetail} from "../pages/Admin/Transaction/TransactionDetail.jsx";
+import {TicketHistoryPage} from "../pages/Customer/TicketHistoryPage/TicketHistoryPage.jsx";
+import {HistoryDetailPage} from "../pages/Customer/TicketHistoryPage/HistoryDetailPage.jsx";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { user, loadingUser } = useAuth();
@@ -64,6 +66,8 @@ export default function AppRoutes() {
                 <Route path='/venues/:id/details' element={<VenueDetails />} />
                 <Route path='/events/:id/details' element={<EventDetails />} />
                 <Route path='/checkout' element={<CheckoutPage />} />
+                <Route path='/ticketHistory' element={<TicketHistoryPage />}/>
+                <Route path='/ticketHistory/:id/details' element={<HistoryDetailPage />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminLayout /></ProtectedRoute>}>

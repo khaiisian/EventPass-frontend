@@ -5,6 +5,8 @@ export const getTransactions = (params = {}) =>
 
 export const getTransactionById = (id) => api.get(`/transactions/${id}`);
 
+export const getTicketHistory = () => api.get(`/transactions/history`);
+
 export const updateTransaction = (id, data) =>
     api.put(`/transactions/${id}`, data);
 
