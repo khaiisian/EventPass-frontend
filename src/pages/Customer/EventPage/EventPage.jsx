@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getEvents } from '../../../api/event.js';
+import { getEventTypes } from '../../../api/eventType.js';
 
 export const EventPage = () => {
     const [events, setEvents] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [eventTypes, setEventTypes] = useState([]);
+    const [initialLoading, setInitialLoading] = useState(true); // Full page loading
+    const [eventsLoading, setEventsLoading] = useState(false); // Only events grid loading
+    const [typesLoading, setTypesLoading] = useState(true);
     const [error, setError] = useState(null);
     const [pagination, setPagination] = useState({
         current_page: 1,
@@ -13,35 +17,54 @@ export const EventPage = () => {
         total: 0
     });
 
-    // UI-only states (no functionality)
+    // State for filters and sorting
     const [searchTerm, setSearchTerm] = useState('');
     const [activeFilter, setActiveFilter] = useState('all');
-    const [sortBy, setSortBy] = useState('date');
+    const [sortBy, setSortBy] = useState('date_desc');
 
-    const filters = [
-        { id: 'all', name: 'All Events' },
-        { id: 'music', name: 'Music' },
-        { id: 'sports', name: 'Sports' },
-        { id: 'conference', name: 'Conferences' },
-        { id: 'festival', name: 'Festivals' },
-        { id: 'workshop', name: 'Workshops' }
-    ];
-
+    // Updated sort options to match backend
     const sortOptions = [
-        { id: 'date', name: 'Date' },
-        { id: 'popular', name: 'Most Popular' },
-        { id: 'name', name: 'Name' }
+        { id: 'date_desc', name: 'Newest' },
+        { id: 'date_asc', name: 'Oldest' },
+        { id: 'name_asc', name: 'Name (A-Z)' },
+        { id: 'name_desc', name: 'Name (Z-A)' },
+        { id: 'popular', name: 'Most Popular' }
     ];
 
-    // Fetch events on component mount
-    useEffect(() => {
-        fetchEvents();
-    }, []);
+    // Track if this is the first load
+    const [isFirstLoad, setIsFirstLoad] = useState(true);
 
-    const fetchEvents = async (page = 1) => {
+    // Fetch events with filters
+    const fetchEvents = useCallback(async (page = 1, isFilterChange = false) => {
         try {
-            setLoading(true);
-            const response = await getEvents({ page, per_page: 9 });
+            // Only show events loading for filter changes, not initial load
+            if (isFilterChange || !isFirstLoad) {
+                setEventsLoading(true);
+            }
+
+            // Prepare query params
+            const params = {
+                page,
+                per_page: 9
+            };
+
+            // Add event type filter if not "all"
+            if (activeFilter !== 'all') {
+                params.event_type_id = activeFilter;
+            }
+
+            // Add search term if exists
+            if (searchTerm.trim()) {
+                params.search = searchTerm.trim();
+                console.log("Search => "+params.search);
+            }
+
+            // Add sort parameter
+            if (sortBy) {
+                params.sort_by = sortBy;
+            }
+
+            const response = await getEvents(params);
             if (response.data.status === true) {
                 setEvents(response.data.data);
                 setPagination(response.data.meta || {
@@ -55,16 +78,74 @@ export const EventPage = () => {
             console.error('Error fetching events:', err);
             setError('Failed to load events');
         } finally {
-            setLoading(false);
+            if (isFirstLoad) {
+                setInitialLoading(false);
+                setIsFirstLoad(false);
+            }
+            setEventsLoading(false);
+        }
+    }, [activeFilter, searchTerm, sortBy, isFirstLoad]);
+
+    // Fetch event types
+    const fetchEventTypes = async () => {
+        try {
+            setTypesLoading(true);
+            const response = await getEventTypes();
+            if (response.data.status === true) {
+                const allEventsOption = { EventTypeId: 'all', EventTypeName: 'All Events' };
+                setEventTypes([allEventsOption, ...response.data.data]);
+            }
+        } catch (err) {
+            console.error('Error fetching event types:', err);
+            const defaultTypes = [
+                { EventTypeId: 'all', EventTypeName: 'All Events' }
+            ];
+            setEventTypes(defaultTypes);
+        } finally {
+            setTypesLoading(false);
         }
     };
 
-    // Pagination handlers
+    // Handle filter change
+    const handleFilterChange = (filterId) => {
+        setActiveFilter(filterId);
+    };
+
+    // Handle sort change
+    const handleSortChange = (e) => {
+        setSortBy(e.target.value);
+    };
+
+    // Handle search change
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+    };
+
+    // Handle page change
     const handlePageChange = (page) => {
         if (page >= 1 && page <= pagination.last_page && page !== pagination.current_page) {
-            fetchEvents(page);
+            fetchEvents(page, true);
         }
     };
+
+    // Fetch data when filters change
+    useEffect(() => {
+        if (!isFirstLoad) {
+            // Reset to page 1 when filters change
+            const timer = setTimeout(() => {
+                fetchEvents(1, true);
+            }, 300); // Debounce delay
+
+            return () => clearTimeout(timer);
+        }
+    }, [activeFilter, sortBy, isFirstLoad, searchTerm]);
+
+    // Initial data fetch
+    useEffect(() => {
+        fetchEvents();
+        fetchEventTypes();
+    }, []);
 
     // Helper functions
     const formatDate = (dateString) => {
@@ -94,24 +175,29 @@ export const EventPage = () => {
 
     // Same icon for all event types
     const getCategoryIcon = () => {
-        return '🎫'; // Same ticket icon for all events
+        return '🎫';
     };
 
-    // Same background color for all event types
     const getCategoryColor = () => {
-        return 'bg-purple-100 text-purple-700'; // Same purple color for all events
+        return 'bg-purple-100 text-purple-700';
     };
 
-    // Get fallback image if EventImage is null
     const getEventImage = (event) => {
         if (event.EventImage) {
             return event.EventImage;
         }
-        // Fallback image for all events
         return 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80';
     };
 
-    if (loading) {
+    // Clear all filters
+    const clearFilters = () => {
+        setActiveFilter('all');
+        setSearchTerm('');
+        setSortBy('date_desc');
+    };
+
+    // Initial full page loading
+    if (initialLoading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
@@ -128,7 +214,7 @@ export const EventPage = () => {
                 <div className="text-center">
                     <p className="text-red-600 mb-4">{error}</p>
                     <button
-                        onClick={() => fetchEvents(1)}
+                        onClick={() => fetchEvents(1, true)}
                         className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                     >
                         Retry
@@ -154,46 +240,69 @@ export const EventPage = () => {
                 </div>
             </div>
 
-            {/* Filters and Controls (UI Only - No Functionality) */}
+            {/* Filters and Controls */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
                 <div className="container mx-auto px-6 py-4">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        {/* Category Filters (UI Only) */}
+                        {/* Category Filters */}
                         <div className="flex flex-wrap gap-2">
-                            {filters.map(filter => (
-                                <button
-                                    key={filter.id}
-                                    onClick={() => setActiveFilter(filter.id)}
-                                    className={`px-4 py-2 rounded-lg transition-colors ${
-                                        activeFilter === filter.id
-                                            ? 'bg-purple-600 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    {filter.name}
-                                </button>
-                            ))}
+                            {typesLoading ? (
+                                Array.from({ length: 5 }).map((_, index) => (
+                                    <div
+                                        key={index}
+                                        className="px-4 py-2 rounded-lg bg-gray-100 animate-pulse"
+                                        style={{ width: '80px', height: '40px' }}
+                                    ></div>
+                                ))
+                            ) : (
+                                eventTypes.map(type => (
+                                    <button
+                                        key={type.EventTypeId}
+                                        onClick={() => handleFilterChange(type.EventTypeId)}
+                                        className={`px-4 py-2 rounded-lg transition-colors ${
+                                            activeFilter === type.EventTypeId
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {type.EventTypeName}
+                                    </button>
+                                ))
+                            )}
                         </div>
 
-                        {/* Search and Sort Container (UI Only) */}
+                        {/* Search and Sort Container */}
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto">
-                            {/* Search Bar (UI Only) */}
+                            {/* Search Bar */}
                             <div className="flex-1 md:flex-none md:w-80">
-                                <input
-                                    type="text"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    placeholder="Search events..."
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
-                                />
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={searchTerm}
+                                        onChange={handleSearchChange}
+                                        placeholder="Search events..."
+                                        className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                                    />
+                                    <svg className="w-4 h-4 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    {searchTerm && (
+                                        <button
+                                            onClick={() => setSearchTerm('')}
+                                            className="absolute right-3 top-2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
-                            {/* Sort Dropdown (UI Only) */}
+                            {/* Sort Dropdown */}
                             <div className="flex items-center gap-2">
                                 <span className="text-gray-600 text-sm md:text-base">Sort by:</span>
                                 <select
                                     value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
+                                    onChange={handleSortChange}
                                     className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-sm md:text-base"
                                 >
                                     {sortOptions.map(option => (
@@ -205,6 +314,37 @@ export const EventPage = () => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Active filters info */}
+                    {(activeFilter !== 'all' || searchTerm || sortBy !== 'date_desc') && (
+                        <div className="mt-4 flex flex-wrap items-center gap-2">
+                            <span className="text-sm text-gray-600">Active filters:</span>
+                            {activeFilter !== 'all' && (
+                                <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded flex items-center gap-1">
+                                    Type: {eventTypes.find(t => t.EventTypeId === activeFilter)?.EventTypeName || 'Selected'}
+                                    <button onClick={() => setActiveFilter('all')} className="hover:text-purple-900">✕</button>
+                                </span>
+                            )}
+                            {searchTerm && (
+                                <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded flex items-center gap-1">
+                                    Search: "{searchTerm}"
+                                    <button onClick={() => setSearchTerm('')} className="hover:text-blue-900">✕</button>
+                                </span>
+                            )}
+                            {sortBy !== 'date_desc' && (
+                                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded flex items-center gap-1">
+                                    Sort: {sortOptions.find(s => s.id === sortBy)?.name}
+                                    <button onClick={() => setSortBy('date_desc')} className="hover:text-green-900">✕</button>
+                                </span>
+                            )}
+                            <button
+                                onClick={clearFilters}
+                                className="text-sm text-gray-600 hover:text-gray-900 ml-2"
+                            >
+                                Clear all
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -214,7 +354,8 @@ export const EventPage = () => {
                 <div className="mb-8 flex justify-between items-center">
                     <div>
                         <h2 className="text-2xl font-bold text-gray-900">
-                            Upcoming Events
+                            {activeFilter === 'all' ? 'All' : eventTypes.find(t => t.EventTypeId === activeFilter)?.EventTypeName} Events
+                            {searchTerm && ` matching "${searchTerm}"`}
                         </h2>
                         <p className="text-gray-600 mt-1">
                             Showing {((pagination.current_page - 1) * pagination.per_page) + 1}-
@@ -227,197 +368,220 @@ export const EventPage = () => {
                     </div>
                 </div>
 
-                {/* Events Grid */}
-                {events.length === 0 ? (
-                    <div className="text-center py-16">
-                        <div className="text-gray-400 text-6xl mb-4">🎭</div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No events found</h3>
-                        <p className="text-gray-600">
-                            Check back later for new events.
-                        </p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {events.map(event => {
-                                const availableTickets = getAvailableTickets(event);
-                                const isAlmostSoldOut = availableTickets > 0 && availableTickets < 100;
-                                const isSoldOut = availableTickets <= 0;
+                {/* Events Grid with Loading Overlay */}
+                <div className="relative">
+                    {/* Events Loading Overlay */}
+                    {eventsLoading && (
+                        <div className="absolute inset-0 bg-gray-50 bg-opacity-80 flex items-center justify-center z-10 rounded-2xl">
+                            <div className="text-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
+                                <p className="text-gray-600 text-sm">Loading events...</p>
+                            </div>
+                        </div>
+                    )}
 
-                                return (
-                                    <div key={event.EventId} className="group">
-                                        <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                                            {/* Event Image - Clickable */}
-                                            <Link to={`/events/${event.EventId}/details`}>
-                                                <div className="relative h-56 overflow-hidden">
-                                                    <img
-                                                        src={getEventImage(event)}
-                                                        alt={event.EventName}
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                    />
+                    {!eventsLoading && events.length === 0 ? (
+                        <div className="text-center py-16">
+                            <div className="text-gray-400 text-6xl mb-4">🎭</div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">No events found</h3>
+                            <p className="text-gray-600 mb-4">
+                                {searchTerm || activeFilter !== 'all'
+                                    ? 'Try adjusting your search or filters'
+                                    : 'Check back later for new events.'
+                                }
+                            </p>
+                            {(searchTerm || activeFilter !== 'all') && (
+                                <button
+                                    onClick={clearFilters}
+                                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                                >
+                                    Clear all filters
+                                </button>
+                            )}
+                        </div>
+                    ) : (
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {events.map(event => {
+                                    const availableTickets = getAvailableTickets(event);
+                                    const isAlmostSoldOut = availableTickets > 0 && availableTickets < 100;
+                                    const isSoldOut = availableTickets <= 0;
 
-                                                    {/* Category Badge (Same for all events) */}
-                                                    <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor()}`}>
-                                                        {getCategoryIcon()} {event.EventType?.EventTypeName}
+                                    return (
+                                        <div key={event.EventId} className="group">
+                                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                                                {/* Event Image - Clickable */}
+                                                <Link to={`/events/${event.EventId}/details`}>
+                                                    <div className="relative h-56 overflow-hidden">
+                                                        <img
+                                                            src={getEventImage(event)}
+                                                            alt={event.EventName}
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        />
+
+                                                        {/* Category Badge */}
+                                                        <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor()}`}>
+                                                            {getCategoryIcon()} {event.EventType?.EventTypeName || 'Event'}
+                                                        </div>
+
+                                                        {/* Sold Out Badge */}
+                                                        {isSoldOut && (
+                                                            <div className="absolute top-3 right-3 px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full">
+                                                                Sold Out!
+                                                            </div>
+                                                        )}
+
+                                                        {/* Almost Sold Out Badge */}
+                                                        {isAlmostSoldOut && (
+                                                            <div className="absolute top-3 right-3 px-3 py-1 bg-orange-600 text-white text-xs font-bold rounded-full">
+                                                                Almost Sold Out!
+                                                            </div>
+                                                        )}
                                                     </div>
-
-                                                    {/* Sold Out Badge */}
-                                                    {isSoldOut && (
-                                                        <div className="absolute top-3 right-3 px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full">
-                                                            Sold Out!
-                                                        </div>
-                                                    )}
-
-                                                    {/* Almost Sold Out Badge */}
-                                                    {isAlmostSoldOut && (
-                                                        <div className="absolute top-3 right-3 px-3 py-1 bg-orange-600 text-white text-xs font-bold rounded-full">
-                                                            Almost Sold Out!
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </Link>
-
-                                            {/* Event Details */}
-                                            <div className="p-6">
-                                                {/* Event Name - Clickable */}
-                                                <Link to={`/events/${event.EventId}/details`} className="block mb-3">
-                                                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-2">
-                                                        {event.EventName}
-                                                    </h3>
                                                 </Link>
 
-                                                {/* Date and Time */}
-                                                <div className="flex items-center gap-3 text-gray-600 mb-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                        </svg>
-                                                        <span>{formatDate(event.StartDate)}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        <span>{formatTime(event.StartDate)}</span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Venue */}
-                                                <div className="flex items-center gap-2 text-gray-600 mb-4">
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    </svg>
-                                                    <span className="text-sm">{event.Venue?.VenueName}</span>
-                                                </div>
-
-                                                {/* Ticket Availability */}
-                                                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                                                    <div>
-                                                        <div className={`text-sm font-medium ${
-                                                            isSoldOut ? 'text-red-600' :
-                                                                isAlmostSoldOut ? 'text-orange-600' :
-                                                                    'text-gray-900'
-                                                        }`}>
-                                                            {isSoldOut
-                                                                ? 'Sold Out'
-                                                                : `${availableTickets.toLocaleString()} tickets available`
-                                                            }
-                                                        </div>
-                                                        <div className="text-xs text-gray-500">
-                                                            Total: {event.TotalTicketQuantity?.toLocaleString() || '0'} tickets
-                                                        </div>
-                                                    </div>
-
-                                                    {/* View Button - Only clickable if not sold out */}
-                                                    <Link
-                                                        to={isSoldOut ? '#' : `/events/${event.EventId}/details`}
-                                                        className={`inline-block px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                                                            isSoldOut
-                                                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none'
-                                                                : 'bg-purple-600 text-white hover:bg-purple-700'
-                                                        }`}
-                                                    >
-                                                        {isSoldOut ? 'Sold Out' : 'View Details'}
+                                                {/* Event Details */}
+                                                <div className="p-6">
+                                                    {/* Event Name - Clickable */}
+                                                    <Link to={`/events/${event.EventId}/details`} className="block mb-3">
+                                                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-2">
+                                                            {event.EventName}
+                                                        </h3>
                                                     </Link>
+
+                                                    {/* Date and Time */}
+                                                    <div className="flex items-center gap-3 text-gray-600 mb-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                            </svg>
+                                                            <span>{formatDate(event.StartDate)}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                            <span>{formatTime(event.StartDate)}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Venue */}
+                                                    <div className="flex items-center gap-2 text-gray-600 mb-4">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        </svg>
+                                                        <span className="text-sm">{event.Venue?.VenueName}</span>
+                                                    </div>
+
+                                                    {/* Ticket Availability */}
+                                                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                                                        <div>
+                                                            <div className={`text-sm font-medium ${
+                                                                isSoldOut ? 'text-red-600' :
+                                                                    isAlmostSoldOut ? 'text-orange-600' :
+                                                                        'text-gray-900'
+                                                            }`}>
+                                                                {isSoldOut
+                                                                    ? 'Sold Out'
+                                                                    : `${availableTickets.toLocaleString()} tickets available`
+                                                                }
+                                                            </div>
+                                                            <div className="text-xs text-gray-500">
+                                                                Total: {event.TotalTicketQuantity?.toLocaleString() || '0'} tickets
+                                                            </div>
+                                                        </div>
+
+                                                        {/* View Button - Only clickable if not sold out */}
+                                                        <Link
+                                                            to={isSoldOut ? '#' : `/events/${event.EventId}/details`}
+                                                            className={`inline-block px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                                                isSoldOut
+                                                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none'
+                                                                    : 'bg-purple-600 text-white hover:bg-purple-700'
+                                                            }`}
+                                                        >
+                                                            {isSoldOut ? 'Sold Out' : 'View Details'}
+                                                        </Link>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Pagination Controls */}
-                        {pagination.last_page > 1 && (
-                            <div className="flex justify-center items-center gap-2 mt-12">
-                                <button
-                                    onClick={() => handlePageChange(pagination.current_page - 1)}
-                                    disabled={pagination.current_page === 1}
-                                    className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-                                        pagination.current_page === 1
-                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                                    </svg>
-                                    Previous
-                                </button>
-
-                                <div className="flex gap-1">
-                                    {[...Array(pagination.last_page)].map((_, index) => {
-                                        const pageNum = index + 1;
-                                        // Show first, last, current, and pages around current
-                                        if (
-                                            pageNum === 1 ||
-                                            pageNum === pagination.last_page ||
-                                            (pageNum >= pagination.current_page - 1 && pageNum <= pagination.current_page + 1)
-                                        ) {
-                                            return (
-                                                <button
-                                                    key={pageNum}
-                                                    onClick={() => handlePageChange(pageNum)}
-                                                    className={`w-10 h-10 rounded-lg ${
-                                                        pagination.current_page === pageNum
-                                                            ? 'bg-purple-600 text-white'
-                                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                    }`}
-                                                >
-                                                    {pageNum}
-                                                </button>
-                                            );
-                                        }
-                                        // Show ellipsis
-                                        if (
-                                            pageNum === 2 && pagination.current_page > 3 ||
-                                            pageNum === pagination.last_page - 1 && pagination.current_page < pagination.last_page - 2
-                                        ) {
-                                            return <span key={pageNum} className="w-10 h-10 flex items-center justify-center">...</span>;
-                                        }
-                                        return null;
-                                    })}
-                                </div>
-
-                                <button
-                                    onClick={() => handlePageChange(pagination.current_page + 1)}
-                                    disabled={pagination.current_page === pagination.last_page}
-                                    className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-                                        pagination.current_page === pagination.last_page
-                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    Next
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </button>
+                                    );
+                                })}
                             </div>
-                        )}
-                    </>
-                )}
+
+                            {/* Pagination Controls */}
+                            {!eventsLoading && pagination.last_page > 1 && (
+                                <div className="flex justify-center items-center gap-2 mt-12">
+                                    <button
+                                        onClick={() => handlePageChange(pagination.current_page - 1)}
+                                        disabled={pagination.current_page === 1}
+                                        className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                                            pagination.current_page === 1
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                                        </svg>
+                                        Previous
+                                    </button>
+
+                                    <div className="flex gap-1">
+                                        {[...Array(pagination.last_page)].map((_, index) => {
+                                            const pageNum = index + 1;
+                                            // Show first, last, current, and pages around current
+                                            if (
+                                                pageNum === 1 ||
+                                                pageNum === pagination.last_page ||
+                                                (pageNum >= pagination.current_page - 1 && pageNum <= pagination.current_page + 1)
+                                            ) {
+                                                return (
+                                                    <button
+                                                        key={pageNum}
+                                                        onClick={() => handlePageChange(pageNum)}
+                                                        className={`w-10 h-10 rounded-lg ${
+                                                            pagination.current_page === pageNum
+                                                                ? 'bg-purple-600 text-white'
+                                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                        }`}
+                                                    >
+                                                        {pageNum}
+                                                    </button>
+                                                );
+                                            }
+                                            // Show ellipsis
+                                            if (
+                                                pageNum === 2 && pagination.current_page > 3 ||
+                                                pageNum === pagination.last_page - 1 && pagination.current_page < pagination.last_page - 2
+                                            ) {
+                                                return <span key={pageNum} className="w-10 h-10 flex items-center justify-center">...</span>;
+                                            }
+                                            return null;
+                                        })}
+                                    </div>
+
+                                    <button
+                                        onClick={() => handlePageChange(pagination.current_page + 1)}
+                                        disabled={pagination.current_page === pagination.last_page}
+                                        className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                                            pagination.current_page === pagination.last_page
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        Next
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

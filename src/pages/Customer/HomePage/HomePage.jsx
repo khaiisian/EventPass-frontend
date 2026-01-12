@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getTopEvents } from '../../../api/event.js';
-import { getTopVenues } from '../../../api/venue.js'; // Import the venue API
+import { getTopVenues } from '../../../api/venue.js';
 
 export const HomePage = () => {
     const [featuredEvents, setFeaturedEvents] = useState([]);
-    const [featuredVenues, setFeaturedVenues] = useState([]); // Add state for venues
+    const [featuredVenues, setFeaturedVenues] = useState([]);
     const [eventsLoading, setEventsLoading] = useState(true);
-    const [venuesLoading, setVenuesLoading] = useState(true); // Separate loading state
+    const [venuesLoading, setVenuesLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         fetchTopEvents();
-        fetchTopVenues(); // Fetch venues
+        fetchTopVenues();
     }, []);
 
     const fetchTopEvents = async () => {
@@ -34,28 +34,15 @@ export const HomePage = () => {
         try {
             setVenuesLoading(true);
             const response = await getTopVenues();
-            console.log('Venues response:', response);
-            console.log(response);
             if (response.data.status === true) {
                 setFeaturedVenues(response.data.data);
-                console.log('Venues response:', response.data.data);
             }
         } catch (err) {
             console.error('Error fetching top venues:', err);
-            // Don't set error for venues to not break the UI
         } finally {
             setVenuesLoading(false);
         }
     };
-
-    // const categories = [
-    //     { name: "Music Concerts", icon: "🎵", color: "bg-purple-100 text-purple-700" },
-    //     { name: "Sports", icon: "⚽", color: "bg-green-100 text-green-700" },
-    //     { name: "Conferences", icon: "💼", color: "bg-blue-100 text-blue-700" },
-    //     { name: "Festivals", icon: "🎪", color: "bg-pink-100 text-pink-700" },
-    //     { name: "Workshops", icon: "🎨", color: "bg-yellow-100 text-yellow-700" },
-    //     { name: "Exhibitions", icon: "🖼️", color: "bg-indigo-100 text-indigo-700" }
-    // ];
 
     const formatDate = (dateString) => {
         if (!dateString) return 'Date TBD';
@@ -67,37 +54,14 @@ export const HomePage = () => {
         });
     };
 
-    const getCategoryIcon = (eventTypeName) => {
-        switch (eventTypeName?.toLowerCase()) {
-            case 'music concert': return '🎵';
-            case 'sports event': return '⚽';
-            case 'conference': return '💼';
-            case 'festival': return '🎪';
-            default: return '🎫';
-        }
-    };
-
     const getAvailableTickets = (event) => {
         const total = event.TotalTicketQuantity || 0;
         const sold = event.SoldOutTicketQuantity || 0;
         return total - sold;
     };
 
-    // Helper to format capacity with commas
     const formatCapacity = (capacity) => {
         return capacity ? capacity.toLocaleString() : 'N/A';
-    };
-
-    const getVenueTypeIcon = (venueTypeName) => {
-        switch (venueTypeName?.toLowerCase()) {
-            case 'stadium': return '🏟️';
-            case 'conference hall': return '💼';
-            case 'theater': return '🎭';
-            case 'arena': return '🏀';
-            case 'outdoor': return '⛰️';
-            case 'concert hall': return '🎵';
-            default: return '📍';
-        }
     };
 
     return (
@@ -123,7 +87,6 @@ export const HomePage = () => {
                             </p>
                         </div>
 
-                        {/* Quick Stats */}
                         <div className="flex flex-wrap justify-center gap-8 mb-12">
                             <div className="text-center">
                                 <div className="text-3xl font-bold mb-1">500+</div>
@@ -143,7 +106,6 @@ export const HomePage = () => {
                             </div>
                         </div>
 
-                        {/* CTA Buttons */}
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Link
                                 to="/events"
@@ -161,7 +123,6 @@ export const HomePage = () => {
                     </div>
                 </div>
 
-                {/* Animated Bottom Wave */}
                 <div className="absolute bottom-0 left-0 right-0">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full">
                         <path fill="#ffffff" fillOpacity="1" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,192C672,181,768,139,864,138.7C960,139,1056,181,1152,197.3C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
@@ -215,9 +176,6 @@ export const HomePage = () => {
                                             src={event.EventImage}
                                             alt={event.EventName}
                                             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                            onError={(e) => {
-                                                e.target.src = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800';
-                                            }}
                                         />
                                         {isAlmostSoldOut && (
                                             <div className="absolute top-3 right-3 px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full">
@@ -227,8 +185,7 @@ export const HomePage = () => {
                                     </div>
                                     <div className="p-6">
                                         <div className="flex justify-between items-start mb-3">
-                                            <span className="px-3 py-1 bg-purple-100 text-purple-700 text-sm font-medium rounded-full flex items-center gap-1">
-                                                <span>{getCategoryIcon(event.EventType?.EventTypeName)}</span>
+                                            <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
                                                 {event.EventType?.EventTypeName || 'Event'}
                                             </span>
                                             <span className="text-gray-500 text-sm">
@@ -255,7 +212,7 @@ export const HomePage = () => {
                                             </div>
                                         </div>
                                         <Link
-                                            to={`/events/${event.EventId}`}
+                                            to={`/events/${event.EventId}/details`}
                                             className="block w-full py-3 bg-gray-900 text-white font-medium text-center rounded-lg hover:bg-gray-800 transition-colors"
                                         >
                                             View Details
@@ -268,7 +225,7 @@ export const HomePage = () => {
                 )}
             </div>
 
-            {/* Popular Venues Section - Using Real API Data */}
+            {/* Popular Venues Section */}
             <div className="container mx-auto px-6 py-16">
                 <div className="flex justify-between items-center mb-12">
                     <div>
@@ -297,15 +254,12 @@ export const HomePage = () => {
                             <div key={venue.VenueId} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow group">
                                 <div className="h-64 overflow-hidden relative">
                                     <img
-                                        src={venue.VenueImage || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800'}
+                                        src={venue.VenueImage}
                                         alt={venue.VenueName}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                        onError={(e) => {
-                                            e.target.src = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800';
-                                        }}
                                     />
                                     <div className="absolute top-3 right-3 px-3 py-1 bg-black/80 text-white text-xs font-bold rounded-full">
-                                        {getVenueTypeIcon(venue.venueType?.VenueTypeName)}
+                                        {venue.venueType?.VenueTypeName || 'Venue'}
                                     </div>
                                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
                                         <h3 className="text-2xl font-bold text-white mb-2">{venue.VenueName}</h3>
@@ -323,9 +277,9 @@ export const HomePage = () => {
                                             <div className="text-sm text-gray-600 mb-1">Capacity</div>
                                             <div className="text-xl font-bold text-gray-900">{formatCapacity(venue.Capacity)}</div>
                                         </div>
-                                        <div className="text-center p-3 bg-purple-50 rounded-lg">
-                                            <div className="text-sm text-purple-600 mb-1">Type</div>
-                                            <div className="text-xl font-bold text-purple-700">
+                                        <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                            <div className="text-sm text-gray-600 mb-1">Type</div>
+                                            <div className="text-xl font-bold text-gray-900">
                                                 {venue.venueType?.VenueTypeName || 'Venue'}
                                             </div>
                                         </div>
@@ -338,7 +292,7 @@ export const HomePage = () => {
                                             <span className="text-sm">{venue.VenueCode}</span>
                                         </div>
                                         <Link
-                                            to={`/venues/${venue.VenueId}`}
+                                            to={`/venues/${venue.VenueId}/details`}
                                             className="px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
                                         >
                                             View Details
@@ -351,29 +305,6 @@ export const HomePage = () => {
                 )}
             </div>
 
-            {/* Categories Section - Optional (currently commented out) */}
-            {/*<div className="bg-gray-100 py-16">*/}
-            {/*    <div className="container mx-auto px-6">*/}
-            {/*        <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">*/}
-            {/*            Browse by Category*/}
-            {/*        </h2>*/}
-            {/*        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">*/}
-            {/*            {categories.map((category, index) => (*/}
-            {/*                <Link*/}
-            {/*                    key={index}*/}
-            {/*                    to={`/events?category=${category.name.toLowerCase().replace(' ', '-')}`}*/}
-            {/*                    className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow text-center group"*/}
-            {/*                >*/}
-            {/*                    <div className={`w-16 h-16 ${category.color} rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 group-hover:scale-110 transition-transform`}>*/}
-            {/*                        {category.icon}*/}
-            {/*                    </div>*/}
-            {/*                    <h3 className="font-semibold text-gray-900">{category.name}</h3>*/}
-            {/*                </Link>*/}
-            {/*            ))}*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
-
             {/* How It Works Section */}
             <div className="container mx-auto px-6 py-16">
                 <h2 className="text-3xl font-bold text-gray-900 text-center mb-16">
@@ -382,7 +313,7 @@ export const HomePage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                     <div className="text-center">
-                        <div className="w-20 h-20 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-3xl font-bold mb-6 mx-auto">
+                        <div className="w-20 h-20 bg-gray-100 text-gray-700 rounded-2xl flex items-center justify-center text-3xl font-bold mb-6 mx-auto">
                             1
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-3">Find Events</h3>
@@ -392,7 +323,7 @@ export const HomePage = () => {
                     </div>
 
                     <div className="text-center">
-                        <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl font-bold mb-6 mx-auto">
+                        <div className="w-20 h-20 bg-gray-100 text-gray-700 rounded-2xl flex items-center justify-center text-3xl font-bold mb-6 mx-auto">
                             2
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-3">Book Tickets</h3>
@@ -402,7 +333,7 @@ export const HomePage = () => {
                     </div>
 
                     <div className="text-center">
-                        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center text-3xl font-bold mb-6 mx-auto">
+                        <div className="w-20 h-20 bg-gray-100 text-gray-700 rounded-2xl flex items-center justify-center text-3xl font-bold mb-6 mx-auto">
                             3
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-3">Enjoy Event</h3>
@@ -412,32 +343,6 @@ export const HomePage = () => {
                     </div>
                 </div>
             </div>
-
-            {/* CTA Section */}
-            {/*<div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-16">*/}
-            {/*    <div className="container mx-auto px-6 text-center">*/}
-            {/*        <h2 className="text-3xl md:text-4xl font-bold mb-6">*/}
-            {/*            Ready to Find Your Next Adventure?*/}
-            {/*        </h2>*/}
-            {/*        <p className="text-xl text-purple-100 mb-10 max-w-2xl mx-auto">*/}
-            {/*            Join thousands of people discovering unforgettable events every day.*/}
-            {/*        </p>*/}
-            {/*        <div className="flex flex-col sm:flex-row gap-4 justify-center">*/}
-            {/*            <Link*/}
-            {/*                to="/events"*/}
-            {/*                className="px-8 py-4 bg-white text-purple-600 font-bold rounded-xl hover:bg-purple-50 transition-colors"*/}
-            {/*            >*/}
-            {/*                Browse All Events*/}
-            {/*            </Link>*/}
-            {/*            <Link*/}
-            {/*                to="/register"*/}
-            {/*                className="px-8 py-4 bg-transparent border-2 border-white text-white font-bold rounded-xl hover:bg-white/10 transition-colors"*/}
-            {/*            >*/}
-            {/*                Create Account*/}
-            {/*            </Link>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
         </div>
     );
 };

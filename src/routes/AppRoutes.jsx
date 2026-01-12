@@ -44,20 +44,71 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     if (loadingUser) return <div>Loading...</div>;
     if (!user) return <Navigate to="/login" replace />;
     if (allowedRoles && !allowedRoles.includes(user.Role)) {
-        return <Navigate to={user.Role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'} replace />;
+        return <Navigate to={user.Role === 'ADMIN' ? '/admin/dashboard' : '/homepage'} replace />;
     }
+    return children;
+};
+
+const RootRedirect = () => {
+    const { user, loadingUser } = useAuth();
+
+    if (loadingUser) return <div>Loading...</div>;
+
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    if (user.Role === "ADMIN") {
+        return <Navigate to="/admin/dashboard" replace />;
+    }
+
+    if (user.Role === "CUSTOMER") {
+        return <Navigate to="/homepage" replace />;
+    }
+
+    return <Navigate to="/login" replace />;
+};
+
+const PublicRoute = ({ children }) => {
+    const { user, loadingUser } = useAuth();
+
+    if (loadingUser) return <div>Loading...</div>;
+
+    if (user) {
+        if (user.Role === "ADMIN") {
+            return <Navigate to="/admin/dashboard" replace />;
+        }
+
+        if (user.Role === "CUSTOMER") {
+            return <Navigate to="/homepage" replace />;
+        }
+    }
+
     return children;
 };
 
 export default function AppRoutes() {
     return (
         <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/" element={<RootRedirect />} />
+            <Route
+                path="/login"
+                element={
+                    <PublicRoute>
+                        <Login />
+                    </PublicRoute>
+                }
+            />
+            <Route
+                path="/register"
+                element={
+                    <PublicRoute>
+                        <Register />
+                    </PublicRoute>
+                }
+            />
 
             <Route element={<ProtectedRoute allowedRoles={['CUSTOMER']}><MainLayout /></ProtectedRoute>}>
-                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<UserProfile />} />
                 <Route path="/editprofile" element={<EditProfile />} />
                 <Route path="/homepage" element={<HomePage />} />

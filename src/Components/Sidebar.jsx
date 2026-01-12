@@ -100,6 +100,10 @@ const Sidebar = () => {
                 <Link to="/admin/events" className={linkClass('/admin/events')}>
                     Events
                 </Link>
+
+                <Link to="/admin/transactions" className={linkClass('/admin/transactions')}>
+                    Transactions
+                </Link>
             </nav>
 
             {/* Logout Button */}

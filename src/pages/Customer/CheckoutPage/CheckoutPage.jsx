@@ -70,7 +70,7 @@ export const CheckoutPage = () => {
                 //     state: bookingData
                 // })
 
-                navigate('/');
+                navigate('/homepage');
             } else {
                 throw new Error(response.data.message || 'Failed to process payment')
             }

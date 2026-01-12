@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { getEvents, deleteEvent } from "../../../api/event.js";
+import { getEventTypes } from '../../../api/eventType.js';
 import { Link } from "react-router-dom";
 
 export const EventList = () => {
     const [events, setEvents] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [eventTypes, setEventTypes] = useState([]);
+    const [initialLoading, setInitialLoading] = useState(true); // Full page loading
+    const [tableLoading, setTableLoading] = useState(false); // Table-only loading
+    const [typesLoading, setTypesLoading] = useState(true);
     const [pagination, setPagination] = useState({
         current_page: 1,
         last_page: 1,
@@ -12,9 +16,59 @@ export const EventList = () => {
         total: 0
     });
 
-    const fetchEvents = async (page = 1) => {
+    // State for filters and sorting
+    const [searchTerm, setSearchTerm] = useState('');
+    const [activeFilter, setActiveFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('newest');
+
+    // Sort options for admin
+    const sortOptions = [
+        { id: 'newest', name: 'Newest First' },
+        { id: 'oldest', name: 'Oldest First' },
+        { id: 'name_asc', name: 'Name (A-Z)' },
+        { id: 'name_desc', name: 'Name (Z-A)' },
+        { id: 'date_asc', name: 'Date (Oldest)' },
+        { id: 'date_desc', name: 'Date (Newest)' },
+        { id: 'popular', name: 'Most Popular' }
+    ];
+
+    // Track if this is the first load
+    const [isFirstLoad, setIsFirstLoad] = useState(true);
+
+    // Fetch events with filters
+    const fetchEvents = useCallback(async (page = 1, isFilterChange = false) => {
         try {
-            const response = await getEvents({ page, per_page: 10 });
+            // Only show table loading for filter changes, not initial load
+            if (isFilterChange || !isFirstLoad) {
+                setTableLoading(true);
+            }
+
+            // Prepare query params
+            const params = {
+                page,
+                per_page: 10
+            };
+
+            // Add event type filter if not "all"
+            if (activeFilter !== 'all') {
+                params.event_type_id = activeFilter;
+            }
+
+            // Add search term if exists
+            if (searchTerm.trim()) {
+                params.search = searchTerm.trim();
+            }
+
+            // Add sort parameter
+            if (sortBy === 'newest') {
+                params.sort_by = ''; // Will use default (CreatedAt desc)
+            } else if (sortBy === 'oldest') {
+                params.sort_by = 'date_asc';
+            } else if (sortBy) {
+                params.sort_by = sortBy;
+            }
+
+            const response = await getEvents(params);
             setEvents(response.data.data);
             setPagination(response.data.meta || {
                 current_page: page,
@@ -25,13 +79,49 @@ export const EventList = () => {
         } catch (error) {
             console.log(error);
         } finally {
-            setLoading(false);
+            if (isFirstLoad) {
+                setInitialLoading(false);
+                setIsFirstLoad(false);
+            }
+            setTableLoading(false);
         }
-    }
+    }, [activeFilter, searchTerm, sortBy, isFirstLoad]);
+
+    // Fetch event types
+    const fetchEventTypes = async () => {
+        try {
+            setTypesLoading(true);
+            const response = await getEventTypes();
+            if (response.data.status === true) {
+                const allEventsOption = { EventTypeId: 'all', EventTypeName: 'All Types' };
+                setEventTypes([allEventsOption, ...response.data.data]);
+            }
+        } catch (err) {
+            console.error('Error fetching event types:', err);
+            const defaultTypes = [
+                { EventTypeId: 'all', EventTypeName: 'All Types' }
+            ];
+            setEventTypes(defaultTypes);
+        } finally {
+            setTypesLoading(false);
+        }
+    };
 
     useEffect(() => {
         fetchEvents();
+        fetchEventTypes();
     }, []);
+
+    // Handle filter changes with debounce
+    useEffect(() => {
+        if (!isFirstLoad) {
+            const timer = setTimeout(() => {
+                fetchEvents(1, true); // Reset to page 1 when filters change
+            }, 300);
+
+            return () => clearTimeout(timer);
+        }
+    }, [activeFilter, sortBy, isFirstLoad, searchTerm]);
 
     const handleDelete = async (id) => {
         if (!confirm('Are you sure you want to delete this event?')) {
@@ -39,7 +129,7 @@ export const EventList = () => {
         }
         try {
             await deleteEvent(id);
-            fetchEvents(pagination.current_page);
+            fetchEvents(pagination.current_page, true);
         } catch (error) {
             console.log(error);
         }
@@ -47,15 +137,35 @@ export const EventList = () => {
 
     const handlePageChange = (page) => {
         if (page >= 1 && page <= pagination.last_page && page !== pagination.current_page) {
-            fetchEvents(page);
+            fetchEvents(page, true);
         }
     }
 
-    if (loading) {
+    const handleFilterChange = (filterId) => {
+        setActiveFilter(filterId);
+    };
+
+    const handleSortChange = (e) => {
+        setSortBy(e.target.value);
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const clearFilters = () => {
+        setActiveFilter('all');
+        setSearchTerm('');
+        setSortBy('newest');
+    };
+
+    // Initial full page loading
+    if (initialLoading) {
         return (
-            <div className="px-4 md:px-6 lg:px-8">
-                <div className="flex justify-center items-center h-64">
-                    <div className="text-gray-500">Loading events...</div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading events...</p>
                 </div>
             </div>
         );
@@ -111,8 +221,124 @@ export const EventList = () => {
                 </Link>
             </div>
 
-            {/* Table Container */}
-            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+            {/* Filters Section */}
+            <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                    {/* Event Type Filters */}
+                    <div className="flex-1">
+                        <div className="flex flex-wrap gap-2">
+                            {typesLoading ? (
+                                Array.from({ length: 3 }).map((_, index) => (
+                                    <div
+                                        key={index}
+                                        className="px-4 py-2 rounded-lg bg-gray-100 animate-pulse"
+                                        style={{ width: '100px', height: '40px' }}
+                                    ></div>
+                                ))
+                            ) : (
+                                eventTypes.map(type => (
+                                    <button
+                                        key={type.EventTypeId}
+                                        onClick={() => handleFilterChange(type.EventTypeId)}
+                                        className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                                            activeFilter === type.EventTypeId
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {type.EventTypeName}
+                                    </button>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Search and Sort */}
+                    <div className="flex flex-col md:flex-row gap-4">
+                        {/* Search Bar */}
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                placeholder="Search events..."
+                                className="w-full md:w-64 px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-sm"
+                            />
+                            <svg className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            {searchTerm && (
+                                <button
+                                    onClick={() => setSearchTerm('')}
+                                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Sort Dropdown */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">Sort by:</span>
+                            <select
+                                value={sortBy}
+                                onChange={handleSortChange}
+                                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-sm"
+                            >
+                                {sortOptions.map(option => (
+                                    <option key={option.id} value={option.id}>
+                                        {option.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Active filters info */}
+                {(activeFilter !== 'all' || searchTerm || sortBy !== 'newest') && (
+                    <div className="mt-4 flex flex-wrap items-center gap-2 pt-4 border-t border-gray-100">
+                        <span className="text-sm text-gray-600">Active filters:</span>
+                        {activeFilter !== 'all' && (
+                            <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded flex items-center gap-1">
+                                Type: {eventTypes.find(t => t.EventTypeId === activeFilter)?.EventTypeName || 'Selected'}
+                                <button onClick={() => setActiveFilter('all')} className="hover:text-purple-900">✕</button>
+                            </span>
+                        )}
+                        {searchTerm && (
+                            <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded flex items-center gap-1">
+                                Search: "{searchTerm}"
+                                <button onClick={() => setSearchTerm('')} className="hover:text-blue-900">✕</button>
+                            </span>
+                        )}
+                        {sortBy !== 'newest' && (
+                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded flex items-center gap-1">
+                                Sort: {sortOptions.find(s => s.id === sortBy)?.name}
+                                <button onClick={() => setSortBy('newest')} className="hover:text-green-900">✕</button>
+                            </span>
+                        )}
+                        <button
+                            onClick={clearFilters}
+                            className="text-sm text-gray-600 hover:text-gray-900 ml-2"
+                        >
+                            Clear all
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Table Container with Loading Overlay */}
+            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white relative">
+                {/* Table Loading Overlay */}
+                {tableLoading && (
+                    <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
+                            <p className="text-gray-600 text-sm">Loading events...</p>
+                        </div>
+                    </div>
+                )}
+
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-800 border-b border-gray-200">
@@ -129,128 +355,142 @@ export const EventList = () => {
                         </thead>
 
                         <tbody>
-                        {events.map(event => (
-                            <tr
-                                key={event.EventId}
-                                className="border-b border-gray-100 hover:bg-gray-50"
-                            >
-                                {/* Code */}
-                                <td className="py-5 px-6">
-                                    <div className="font-mono font-medium text-gray-900 bg-gray-50 px-3 py-1 rounded text-sm inline-block">
-                                        {event.EventCode}
-                                    </div>
-                                </td>
-
-                                {/* Event Name */}
-                                <td className="py-5 px-6">
-                                    <div className="font-medium text-gray-900">
-                                        {event.EventName}
-                                    </div>
-                                </td>
-
-                                {/* Type */}
-                                <td className="py-5 px-6">
-                                    <div className="text-gray-700">
-                                        {event.EventType?.EventTypeName || '-'}
-                                    </div>
-                                </td>
-
-                                {/* Venue */}
-                                <td className="py-5 px-6">
-                                    <div className="text-gray-700">
-                                        {event.Venue?.VenueName || '-'}
-                                    </div>
-                                </td>
-
-                                {/* Dates */}
-                                <td className="py-5 px-6">
-                                    <div className="space-y-1">
-                                        <div className="text-sm">
-                                            <span className="text-gray-500">Start: </span>
-                                            <span className="font-medium">{formatDate(event.StartDate)}</span>
+                        {!tableLoading && events.length > 0 ? (
+                            events.map(event => (
+                                <tr
+                                    key={event.EventId}
+                                    className="border-b border-gray-100 hover:bg-gray-50"
+                                >
+                                    {/* Code */}
+                                    <td className="py-5 px-6">
+                                        <div className="font-mono font-medium text-gray-900 bg-gray-50 px-3 py-1 rounded text-sm inline-block">
+                                            {event.EventCode}
                                         </div>
-                                        <div className="text-sm">
-                                            <span className="text-gray-500">End: </span>
-                                            <span className="font-medium">{formatDate(event.EndDate)}</span>
-                                        </div>
-                                    </div>
-                                </td>
+                                    </td>
 
-                                {/* Tickets */}
-                                <td className="py-5 px-6">
-                                    <div className="space-y-2">
-                                        <div className="text-sm">
-                                            <span className="text-gray-500">Sold: </span>
-                                            <span className="font-medium">{event.SoldOutTicketQuantity || 0}/{event.TotalTicketQuantity || 0}</span>
+                                    {/* Event Name */}
+                                    <td className="py-5 px-6">
+                                        <div className="font-medium text-gray-900">
+                                            {event.EventName}
                                         </div>
-                                        {event.TotalTicketQuantity > 0 && (
-                                            <div className="w-32 bg-gray-200 rounded-full h-2">
-                                                <div
-                                                    className="bg-green-500 h-2 rounded-full"
-                                                    style={{
-                                                        width: `${((event.SoldOutTicketQuantity || 0) / event.TotalTicketQuantity * 100)}%`
-                                                    }}
-                                                ></div>
+                                    </td>
+
+                                    {/* Type */}
+                                    <td className="py-5 px-6">
+                                        <div className="text-gray-700">
+                                            {event.EventType?.EventTypeName || '-'}
+                                        </div>
+                                    </td>
+
+                                    {/* Venue */}
+                                    <td className="py-5 px-6">
+                                        <div className="text-gray-700">
+                                            {event.Venue?.VenueName || '-'}
+                                        </div>
+                                    </td>
+
+                                    {/* Dates */}
+                                    <td className="py-5 px-6">
+                                        <div className="space-y-1">
+                                            <div className="text-sm">
+                                                <span className="text-gray-500">Start: </span>
+                                                <span className="font-medium">{formatDate(event.StartDate)}</span>
                                             </div>
-                                        )}
-                                    </div>
-                                </td>
+                                            <div className="text-sm">
+                                                <span className="text-gray-500">End: </span>
+                                                <span className="font-medium">{formatDate(event.EndDate)}</span>
+                                            </div>
+                                        </div>
+                                    </td>
 
-                                {/* Status */}
-                                <td className="py-5 px-6">
-                                    <div className="space-y-2">
+                                    {/* Tickets */}
+                                    <td className="py-5 px-6">
+                                        <div className="space-y-2">
+                                            <div className="text-sm">
+                                                <span className="text-gray-500">Sold: </span>
+                                                <span className="font-medium">{event.SoldOutTicketQuantity || 0}/{event.TotalTicketQuantity || 0}</span>
+                                            </div>
+                                            {event.TotalTicketQuantity > 0 && (
+                                                <div className="w-32 bg-gray-200 rounded-full h-2">
+                                                    <div
+                                                        className="bg-green-500 h-2 rounded-full"
+                                                        style={{
+                                                            width: `${((event.SoldOutTicketQuantity || 0) / event.TotalTicketQuantity * 100)}%`
+                                                        }}
+                                                    ></div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </td>
+
+                                    {/* Status */}
+                                    <td className="py-5 px-6">
+                                        <div className="space-y-2">
                                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeColor(event.EventStatus, event.IsActive)}`}>
                                                 {event.EventStatus || 'PENDING'}
                                             </span>
-                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                                            event.IsActive
-                                                ? 'bg-green-100 text-green-700 border border-green-200'
-                                                : 'bg-gray-100 text-gray-700 border border-gray-200'
-                                        }`}>
+                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                                                event.IsActive
+                                                    ? 'bg-green-100 text-green-700 border border-green-200'
+                                                    : 'bg-gray-100 text-gray-700 border border-gray-200'
+                                            }`}>
                                                 {event.IsActive ? 'Active' : 'Inactive'}
                                             </span>
-                                    </div>
-                                </td>
+                                        </div>
+                                    </td>
 
-                                {/* Actions */}
-                                <td className="py-5 px-6">
-                                    <div className="flex gap-2">
-                                        <Link
-                                            to={`/admin/events/${event.EventId}/edit`}
-                                            className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg font-medium transition text-sm"
-                                        >
-                                            Edit
-                                        </Link>
-                                        <button
-                                            onClick={() => handleDelete(event.EventId)}
-                                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition text-sm"
-                                        >
-                                            Delete
-                                        </button>
+                                    {/* Actions */}
+                                    <td className="py-5 px-6">
+                                        <div className="flex gap-2">
+                                            <Link
+                                                to={`/admin/events/${event.EventId}/edit`}
+                                                className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg font-medium transition text-sm"
+                                            >
+                                                Edit
+                                            </Link>
+                                            <button
+                                                onClick={() => handleDelete(event.EventId)}
+                                                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition text-sm"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : !tableLoading && events.length === 0 ? (
+                            <tr>
+                                <td colSpan="8" className="py-12 text-center">
+                                    <div className="text-gray-400 mb-4">
+                                        <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                        </svg>
                                     </div>
+                                    <h3 className="text-lg font-medium text-gray-900 mb-2">No events found</h3>
+                                    <p className="text-gray-500 mb-4">
+                                        {searchTerm || activeFilter !== 'all'
+                                            ? 'Try adjusting your search or filters'
+                                            : 'Get started by adding your first event.'
+                                        }
+                                    </p>
+                                    {(searchTerm || activeFilter !== 'all') && (
+                                        <button
+                                            onClick={clearFilters}
+                                            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                                        >
+                                            Clear all filters
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
-                        ))}
+                        ) : null}
                         </tbody>
                     </table>
                 </div>
-
-                {/* Empty State */}
-                {events.length === 0 && (
-                    <div className="py-12 text-center">
-                        <div className="text-gray-400 mb-4">
-                            <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                            </svg>
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">No events found</h3>
-                        <p className="text-gray-500">Get started by adding your first event.</p>
-                    </div>
-                )}
             </div>
 
             {/* Pagination */}
-            {pagination.last_page > 1 && (
+            {!tableLoading && pagination.last_page > 1 && (
                 <div className="flex justify-between items-center mt-6 px-4 py-4 border-t border-gray-200">
                     <div className="text-sm text-gray-600">
                         Showing {((pagination.current_page - 1) * pagination.per_page) + 1}-

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom'; // add this
-import { useAuth } from '../../auth/AuthContext.jsx'; // updated import
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../auth/AuthContext.jsx';
 
 export default function Login() {
     const { login, loading, error } = useAuth();

@@ -200,11 +200,8 @@ export const HistoryDetailPage = () => {
                                                 <div className="flex items-center justify-between mb-2">
                                                     <div>
                                                         <h4 className="font-medium text-gray-900">
-                                                            Ticket: {ticket.TransactionTicketCode}
+                                                            Ticket Code: {ticket.TransactionTicketCode}
                                                         </h4>
-                                                        <div className="text-sm text-gray-600 mt-1">
-                                                            Ticket ID: <span className="font-mono">{ticket.TransactionTicketId}</span>
-                                                        </div>
                                                     </div>
                                                     <div className="text-right">
                                                         <div className="text-xl font-bold text-gray-900">
@@ -217,10 +214,7 @@ export const HistoryDetailPage = () => {
                                                 </div>
 
                                                 <div className="mt-4">
-                                                    <div className="text-sm text-gray-600 mb-2">Ticket Type</div>
-                                                    <div className="font-medium text-gray-900">
-                                                        Type ID: <span className="font-mono">{ticket.TicketTypeId}</span>
-                                                    </div>
+                                                    <div className="text-sm text-gray-600 mb-2">Ticket Type: <span className="font-mono">{ticket.TicketType.TicketTypeName}</span></div>
                                                 </div>
                                             </div>
 
@@ -253,55 +247,11 @@ export const HistoryDetailPage = () => {
 
                     {/* Right Column - User Info & Actions */}
                     <div className="lg:col-span-1">
-                        {/* User Information Card */}
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">User Information</h3>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <div className="text-sm text-gray-500 mb-1">Full Name</div>
-                                    <div className="font-medium text-gray-900">{transaction.User?.UserName}</div>
-                                </div>
-
-                                <div>
-                                    <div className="text-sm text-gray-500 mb-1">Email</div>
-                                    <div className="font-medium text-gray-900">{transaction.User?.Email}</div>
-                                </div>
-
-                                <div>
-                                    <div className="text-sm text-gray-500 mb-1">Phone Number</div>
-                                    <div className="font-medium text-gray-900">{transaction.User?.PhNumber || 'N/A'}</div>
-                                </div>
-
-                                <div>
-                                    <div className="text-sm text-gray-500 mb-1">User Code</div>
-                                    <div className="font-mono font-medium text-gray-900">{transaction.User?.UserCode}</div>
-                                </div>
-
-                                <div>
-                                    <div className="text-sm text-gray-500 mb-1">Role</div>
-                                    <div className="font-medium text-gray-900">{transaction.User?.Role}</div>
-                                </div>
-
-                                <div className="pt-4 border-t border-gray-100">
-                                    <div className="text-sm text-gray-500 mb-1">Account Created</div>
-                                    <div className="font-medium text-gray-900">
-                                        {formatShortDate(transaction.User?.CreatedAt)}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         {/* Transaction Metadata Card */}
                         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Transaction Metadata</h3>
 
                             <div className="space-y-4">
-                                <div>
-                                    <div className="text-sm text-gray-500 mb-1">Created By</div>
-                                    <div className="font-medium text-gray-900">{transaction.CreatedBy}</div>
-                                </div>
-
                                 <div>
                                     <div className="text-sm text-gray-500 mb-1">Created At</div>
                                     <div className="font-medium text-gray-900">{formatDate(transaction.CreatedAt)}</div>
