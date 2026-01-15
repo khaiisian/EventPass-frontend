@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getDashboard } from "../../../api/dashboard.js";
 import { useAuth } from "../../../auth/AuthContext.jsx";
 import Highcharts from "highcharts";
@@ -7,7 +7,7 @@ import HighchartsReact from "highcharts-react-official";
 
 export default function Dashboard() {
     const navigate = useNavigate();
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [revenueCategories, setRevenueCategories] = useState([]);
@@ -76,9 +76,10 @@ export default function Dashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 p-8">
-                <div className="flex justify-center items-center h-64">
-                    <div className="text-gray-500">Loading dashboard data...</div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading Dashboard data...</p>
                 </div>
             </div>
         );
@@ -217,7 +218,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="bg-gradient-to-r from-purple-50 to-white rounded-xl shadow-sm p-6 border border-purple-100">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Venue Management</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Events Management</h3>
                     <p className="text-gray-600 text-sm mb-4">Create, edit, or review upcoming events</p>
                     <button
                         onClick={() => navigate("/admin/events")}

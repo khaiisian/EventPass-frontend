@@ -71,13 +71,21 @@ export const TransactionDetail = () => {
         })
     }
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 2
-        }).format(amount)
+    const formatEventDate = (dateString) => {
+        const date = new Date(dateString)
+        return date.toLocaleDateString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
     }
+
+    const formatCurrency = (amount) => {
+        return `${amount} Ks`;
+    };
 
     const getStatusClass = (status) => {
         return status ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
@@ -87,12 +95,20 @@ export const TransactionDetail = () => {
         return status ? 'Completed' : 'Pending'
     }
 
+    const getEventStatusText = (status) => {
+        return status === 1 ? 'Active' : 'Inactive'
+    }
+
+    const getEventStatusClass = (status) => {
+        return status === 1 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+    }
+
     if (loading) {
         return (
             <div className="px-4 md:px-6 lg:px-8 py-6">
                 <div className="flex justify-center items-center h-96">
                     <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
                         <div className="text-gray-500">Loading transaction details...</div>
                     </div>
                 </div>
@@ -140,6 +156,9 @@ export const TransactionDetail = () => {
         )
     }
 
+    // Get the first event (assuming there's at least one)
+    const event = transaction.Event && transaction.Event.length > 0 ? transaction.Event[0] : null
+
     return (
         <div className="px-4 md:px-6 lg:px-8 py-6 max-w-4xl mx-auto">
             {/* Header */}
@@ -156,7 +175,7 @@ export const TransactionDetail = () => {
 
                 <div className="flex justify-between items-start">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Transaction #{transaction.TransactionCode}</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">Transaction: {transaction.TransactionCode}</h1>
                         <div className="flex items-center gap-3 mt-2">
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(transaction.Status)}`}>
                                 {getStatusText(transaction.Status)}
@@ -200,6 +219,51 @@ export const TransactionDetail = () => {
                 )}
             </div>
 
+            {/* Event Information */}
+            {event && (
+                <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                    <h3 className="text-sm font-medium text-gray-500 mb-3">EVENT INFORMATION</h3>
+                    <div className="flex flex-col md:flex-row gap-6">
+                        {event.EventImage && (
+                            <div className="md:w-1/4">
+                                <img
+                                    src={event.EventImage}
+                                    alt={event.EventName}
+                                    className="w-full h-48 object-cover rounded-lg"
+                                />
+                            </div>
+                        )}
+                        <div className="md:w-3/4">
+                            <div className="flex justify-between items-start mb-3">
+                                <h4 className="text-xl font-bold text-gray-900">{event.EventName}</h4>
+                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getEventStatusClass(event.EventStatus)}`}>
+                                    {getEventStatusText(event.EventStatus)}
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <div className="text-sm text-gray-500 mb-1">Event Code</div>
+                                    <div className="font-medium text-gray-900">{event.EventCode}</div>
+                                </div>
+
+                            </div>
+
+                            <div className="space-y-2">
+                                <div>
+                                    <div className="text-sm text-gray-500 mb-1">Start Date</div>
+                                    <div className="font-medium text-gray-900">{formatEventDate(event.StartDate)}</div>
+                                </div>
+                                <div>
+                                    <div className="text-sm text-gray-500 mb-1">End Date</div>
+                                    <div className="font-medium text-gray-900">{formatEventDate(event.EndDate)}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Customer & Payment Info */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -212,7 +276,7 @@ export const TransactionDetail = () => {
                                 <div className="text-gray-600">{transaction.User.PhNumber}</div>
                             )}
                             <div className="text-sm text-gray-500">
-                                ID: #{transaction.UserId} • {transaction.User?.UserCode || 'N/A'}
+                                User Code: {transaction.User?.UserCode || 'N/A'}
                             </div>
                         </div>
                     </div>
@@ -224,9 +288,6 @@ export const TransactionDetail = () => {
                             <div className="text-sm text-gray-600">
                                 Created by: {transaction.CreatedBy}
                             </div>
-                            <div className="text-sm text-gray-500">
-                                Transaction ID: {transaction.TransactionId}
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -237,7 +298,7 @@ export const TransactionDetail = () => {
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-lg font-bold text-gray-900">Tickets</h2>
                     <div className="text-gray-500">
-                        {transaction.TransactionTickets?.length || 0} items
+                        {transaction.TransactionTickets?.length || 0} tickets
                     </div>
                 </div>
 
@@ -246,12 +307,17 @@ export const TransactionDetail = () => {
                         {transaction.TransactionTickets.map((ticket) => (
                             <div key={ticket.TransactionTicketId} className="border border-gray-200 rounded-lg p-4">
                                 <div className="flex justify-between items-center">
-                                    <div>
+                                    <div className="flex-1">
                                         <div className="font-medium text-gray-900">
-                                            {ticket.TransactionTicketCode}
+                                            Ticket Code: {ticket.TransactionTicketCode}
                                         </div>
-                                        <div className="text-sm text-gray-600 mt-1">
-                                            Ticket ID: {ticket.TicketTypeId}
+                                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                                            <div>
+                                                <span className="font-medium">Type:</span> {ticket.TicketType?.TicketTypeName || 'N/A'}
+                                            </div>
+                                            <div>
+                                                <span className="font-medium">Status:</span> {ticket.TicketStatus ? 'Used' : 'Not Used'}
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="text-right">
@@ -298,6 +364,9 @@ export const TransactionDetail = () => {
                                     {ticket.TransactionTicketCode}
                                 </div>
                                 <div className="text-xs text-gray-500">
+                                    {ticket.TicketType?.TicketTypeName || 'N/A'}
+                                </div>
+                                <div className="text-xs font-medium text-gray-700">
                                     {formatCurrency(ticket.Price)}
                                 </div>
                             </div>

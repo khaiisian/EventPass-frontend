@@ -67,11 +67,10 @@ export const EditEventType = () => {
 
     if (loading) {
         return (
-            <div className="px-4 sm:px-6 lg:px-8 py-6">
-                <div className="mt-6 border border-gray-200 shadow-xl rounded-2xl overflow-hidden bg-white p-8 max-w-4xl mx-auto">
-                    <div className="flex justify-center items-center h-64">
-                        <div className="text-gray-500">Loading event type data...</div>
-                    </div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading data...</p>
                 </div>
             </div>
         );

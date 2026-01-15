@@ -49,9 +49,7 @@ export const AuthProvider = ({ children }) => {
         }
     }, [token]);
 
-    /* =========================
-        AXIOS INTERCEPTOR
-    ========================== */
+
     useEffect(() => {
         const interceptor = api.interceptors.response.use(
             response => response,
@@ -103,9 +101,6 @@ export const AuthProvider = ({ children }) => {
         };
     }, [token]);
 
-    /* =========================
-        FETCH USER
-    ========================== */
     const fetchUser = async () => {
         setLoadingUser(true);
         try {
@@ -150,9 +145,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /* =========================
-        REGISTER
-    ========================== */
     const register = async (form) => {
         setLoading(true);
         setError(null);
@@ -170,7 +162,7 @@ export const AuthProvider = ({ children }) => {
             setToken(res.data.token);
             setUser(res.data.user);
 
-            navigate("/dashboard");
+            navigate("/homepage");
         } catch (err) {
             setError(err.response?.data?.message || "Registration Failed");
         } finally {
@@ -178,9 +170,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /* =========================
-        LOGOUT (USER ACTION)
-    ========================== */
     const logout = async () => {
         try {
             if (token) {

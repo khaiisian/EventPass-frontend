@@ -326,12 +326,12 @@ export const EventDetails = () => {
                                                                 {ticket.TicketTypeName}
                                                             </h3>
                                                             <p className="text-gray-600 text-sm">
-                                                                ${parseFloat(ticket.Price || 0).toFixed(2)} per ticket
+                                                                {parseFloat(ticket.Price || 0).toFixed(2)} per ticket
                                                             </p>
                                                         </div>
                                                         <div className="text-right">
                                                             <div className="text-2xl font-bold text-gray-900">
-                                                                ${parseFloat(ticket.Price || 0).toFixed(2)}
+                                                                {parseFloat(ticket.Price || 0).toFixed(2)} Ks
                                                             </div>
                                                             <div className="text-sm text-gray-500">each</div>
                                                         </div>
@@ -412,10 +412,10 @@ export const EventDetails = () => {
                                         <div key={ticket.TicketTypeId} className="flex justify-between items-center">
                                             <div>
                                                 <div className="text-gray-900 font-medium">{ticket.TicketTypeName}</div>
-                                                <div className="text-sm text-gray-500">{qty} × ${parseFloat(ticket.Price || 0).toFixed(2)}</div>
+                                                <div className="text-sm text-gray-500">{qty} × {parseFloat(ticket.Price || 0).toFixed(2)} Ks</div>
                                             </div>
                                             <div className="font-semibold text-gray-900">
-                                                ${(parseFloat(ticket.Price || 0) * qty).toFixed(2)}
+                                                {(parseFloat(ticket.Price || 0) * qty).toFixed(2)} Ks
                                             </div>
                                         </div>
                                     )
@@ -442,7 +442,7 @@ export const EventDetails = () => {
                                         </div>
                                         <div className="flex justify-between text-lg font-bold text-gray-900">
                                             <span>Total</span>
-                                            <span>${totalPrice.toFixed(2)}</span>
+                                            <span>{totalPrice.toFixed(2)} Ks</span>
                                         </div>
                                     </div>
 

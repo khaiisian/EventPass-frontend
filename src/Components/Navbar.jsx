@@ -30,7 +30,7 @@ const Navbar = () => {
     };
 
     const getUserImage = () => {
-        return user?.UserImage || null;
+        return user?.ProfileImg || null;
     };
 
     return (

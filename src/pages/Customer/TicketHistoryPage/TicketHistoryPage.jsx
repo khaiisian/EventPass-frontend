@@ -48,8 +48,8 @@ export const TicketHistoryPage = () => {
     };
 
     const formatPrice = (price) => {
-        if (!price) return '$0.00';
-        return `$${parseFloat(price).toFixed(2)}`;
+        if (!price) return '0.00 Ks';
+        return `${parseFloat(price).toFixed(2)} Ks`;
     };
 
     const getStatusText = (status) => {
@@ -66,7 +66,7 @@ export const TicketHistoryPage = () => {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
                     <p className="text-gray-600">Loading transaction history...</p>
                 </div>
             </div>
@@ -112,7 +112,7 @@ export const TicketHistoryPage = () => {
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <div className="text-sm text-gray-600 mb-1">Total Amount</div>
                             <div className="text-2xl font-bold text-gray-900">
-                                ${transactions.reduce((sum, t) => sum + parseFloat(t.TotalAmount || 0), 0).toFixed(2)}
+                                {transactions.reduce((sum, t) => sum + parseFloat(t.TotalAmount || 0), 0).toFixed(2)} Ks
                             </div>
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">

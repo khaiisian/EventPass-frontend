@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import {buyTickets} from "../../../api/transactionApi.js";
+import { buyTickets } from "../../../api/transactionApi.js";
+import Swal from 'sweetalert2'
 
 export const CheckoutPage = () => {
     const navigate = useNavigate()
@@ -37,6 +38,30 @@ export const CheckoutPage = () => {
         }
     }
 
+    const showSuccessAlert = () => {
+        Swal.fire({
+            title: 'Booking Confirmed!',
+            text: 'Your tickets have been booked successfully.',
+            icon: 'success',
+            confirmButtonText: 'Continue',
+            confirmButtonColor: '#4f46e5',
+            timer: 3000,
+            timerProgressBar: true,
+        }).then(() => {
+            navigate('/homepage');
+        });
+    }
+
+    const showErrorAlert = (message) => {
+        Swal.fire({
+            title: 'Error!',
+            text: message,
+            icon: 'error',
+            confirmButtonText: 'Try Again',
+            confirmButtonColor: '#ef4444'
+        });
+    }
+
     const handleConfirm = async () => {
         try {
             setLoading(true)
@@ -65,18 +90,15 @@ export const CheckoutPage = () => {
                 }
 
                 console.log('Booking confirmed:', bookingData)
-
-                // navigate('/booking-confirmed', {
-                //     state: bookingData
-                // })
-
-                navigate('/homepage');
+                showSuccessAlert();
             } else {
                 throw new Error(response.data.message || 'Failed to process payment')
             }
         } catch (err) {
             console.error('Error processing payment:', err)
-            setError(err.response?.data?.message || err.message || 'Failed to process payment. Please try again.')
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to process payment. Please try again.'
+            setError(errorMessage)
+            showErrorAlert(errorMessage)
         } finally {
             setLoading(false)
         }
@@ -162,11 +184,11 @@ export const CheckoutPage = () => {
                                                 <div>
                                                     <div className="font-semibold text-gray-900">{ticket.TicketTypeName}</div>
                                                     <div className="text-sm text-gray-600 mt-1">
-                                                        ${parseFloat(ticket.Price).toFixed(2)} × {ticket.Quantity}
+                                                        {parseFloat(ticket.Price).toFixed(2)} × {ticket.Quantity} Ks
                                                     </div>
                                                 </div>
                                                 <div className="font-bold text-gray-900">
-                                                    ${ticket.Subtotal.toFixed(2)}
+                                                    {ticket.Subtotal.toFixed(2)} Ks
                                                 </div>
                                             </div>
                                         </div>
@@ -177,7 +199,7 @@ export const CheckoutPage = () => {
                                     <div className="flex justify-between items-center">
                                         <div className="text-lg font-bold text-gray-900">Total</div>
                                         <div className="text-2xl font-bold text-purple-600">
-                                            ${checkoutData.totalAmount.toFixed(2)}
+                                            {checkoutData.totalAmount.toFixed(2)} Ks
                                         </div>
                                     </div>
                                     <div className="text-sm text-gray-500 mt-2 text-center">

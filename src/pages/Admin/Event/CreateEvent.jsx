@@ -178,11 +178,10 @@ export const CreateEvent = () => {
 
     if (loading) {
         return (
-            <div className="px-4 sm:px-6 lg:px-8 py-6">
-                <div className="mt-6 border border-gray-200 shadow-xl rounded-2xl overflow-hidden bg-white p-8 max-w-4xl mx-auto">
-                    <div className="flex justify-center items-center h-64">
-                        <div className="text-gray-500">Loading data...</div>
-                    </div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading data...</p>
                 </div>
             </div>
         );
@@ -529,11 +528,11 @@ export const CreateEvent = () => {
 
                                         <div className="space-y-2">
                                             <label className="block font-medium text-gray-700 text-sm">
-                                                Price ($) <span className="text-red-500">*</span>
+                                                Price (Kyats) <span className="text-red-500">*</span>
                                             </label>
                                             <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span className="text-gray-500">$</span>
+                                                    <span className="text-gray-500">Ks</span>
                                                 </div>
                                                 <input
                                                     type="number"
