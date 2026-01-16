@@ -28,6 +28,9 @@ const EditProfile = () => {
 
     const [profileImg, setProfileImg] = useState(null);
 
+    // Default profile image (you can use any URL or import a local image)
+    const defaultProfileImage = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+
     useEffect(() => {
         if (user) {
             setUserInfoForm({
@@ -69,7 +72,6 @@ const EditProfile = () => {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-
 
             console.log("Result => "+ res);
 
@@ -134,6 +136,21 @@ const EditProfile = () => {
         }
     };
 
+    // Function to get the profile image source
+    const getProfileImageSrc = () => {
+        // If a new image is selected
+        if (profileImg) {
+            return URL.createObjectURL(profileImg);
+        }
+
+        // If user has an existing profile image
+        if (user?.ProfileImg) {
+            return user.ProfileImg;
+        }
+
+        // Default fallback image
+        return defaultProfileImage;
+    };
 
     return (
         <div className="min-h-screen bg-gray-100 py-12">
@@ -151,20 +168,20 @@ const EditProfile = () => {
                     <div className="md:w-2/5 p-6 md:p-8">
                         <div className="w-35">
                             <label className="mt-3 w-36 h-36 rounded-full bg-gray-200 relative cursor-pointer flex items-center justify-center">
-                                {/* Display selected image or existing user image */}
+                                {/* Display selected image or existing user image or default */}
                                 <img
-                                    src={
-                                        profileImg
-                                            ? URL.createObjectURL(profileImg) // selected file preview
-                                            : user?.ProfileImg // existing image from user object
-                                    }
+                                    src={getProfileImageSrc()}
                                     alt="Profile"
                                     className="w-full h-full object-cover rounded-full"
+                                    onError={(e) => {
+                                        // If the image fails to load, show default
+                                        e.target.src = defaultProfileImage;
+                                    }}
                                 />
 
                                 <span className="absolute bottom-2 right-2 bg-white p-1.5 rounded-full shadow border border-gray-200 w-9 h-9 flex items-center justify-center">
-                                        ✎
-                                    </span>
+                                    ✎
+                                </span>
 
                                 <input
                                     type="file"
@@ -175,7 +192,6 @@ const EditProfile = () => {
                             </label>
                         </div>
                     </div>
-
 
                     {userInfoError && <div className="text-red-600 mb-4">{userInfoError}</div>}
                     {userInfoSuccess && <div className="text-green-600 mb-4">{userInfoSuccess}</div>}
@@ -294,7 +310,6 @@ const EditProfile = () => {
                     >
                         Delete Account
                     </button>
-
                 </section>
             </div>
         </div>

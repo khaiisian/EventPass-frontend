@@ -14,7 +14,6 @@ export const EditEvent = () => {
     const [eventTypes, setEventTypes] = useState([]);
     const [venues, setVenues] = useState([]);
     const [organizers, setOrganizers] = useState([]);
-
     const [ticketTypes, setTicketTypes] = useState([]);
 
     const [form, setForm] = useState({
@@ -27,6 +26,7 @@ export const EditEvent = () => {
         IsActive: true,
         EventStatus: "0",
         TotalTicketQuantity: 0,
+        SoldOutTicketQuantity: 0,
         EventImage: null,
         ExistingEventImage: null,
     });
@@ -65,7 +65,8 @@ export const EditEvent = () => {
                     IsActive: event.IsActive || true,
                     EventStatus: event.EventStatus?.toString() || "0",
                     TotalTicketQuantity: event.TotalTicketQuantity || 0,
-                    ExistingEventImage: event.EventImage || null, // Store existing image URL
+                    SoldOutTicketQuantity: event.SoldOutTicketQuantity || 0,
+                    ExistingEventImage: event.EventImage || null,
                 }));
 
                 if (event.TicketType && event.TicketType.length > 0) {
@@ -277,7 +278,7 @@ export const EditEvent = () => {
                             </div>
                         </h2>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* Event Name Field */}
                             <div className="space-y-2">
                                 <label htmlFor="EventName" className="block font-medium text-gray-700">
@@ -435,6 +436,72 @@ export const EditEvent = () => {
                             </div>
 
                             <div className="space-y-2">
+                                <label htmlFor="TotalTicketQuantity" className="block font-medium text-gray-700">
+                                    Total Tickets
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        id="TotalTicketQuantity"
+                                        name="TotalTicketQuantity"
+                                        value={form.TotalTicketQuantity}
+                                        readOnly
+                                        className="w-full border border-gray-300 p-3 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                                    />
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <span className="text-gray-500 text-sm">tickets</span>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Calculated automatically from ticket types
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label htmlFor="SoldOutTicketQuantity" className="block font-medium text-gray-700">
+                                    Sold Tickets
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        id="SoldOutTicketQuantity"
+                                        name="SoldOutTicketQuantity"
+                                        value={form.SoldOutTicketQuantity}
+                                        readOnly
+                                        className="w-full border border-gray-300 p-3 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                                    />
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <span className="text-gray-500 text-sm">tickets</span>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Tickets already sold (readonly)
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label htmlFor="AvailableTickets" className="block font-medium text-gray-700">
+                                    Available Tickets
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        id="AvailableTickets"
+                                        name="AvailableTickets"
+                                        value={form.TotalTicketQuantity - form.SoldOutTicketQuantity}
+                                        readOnly
+                                        className="w-full border border-gray-300 p-3 rounded-lg bg-green-50 text-green-700 font-medium cursor-not-allowed"
+                                    />
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <span className="text-green-500 text-sm">available</span>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Tickets remaining for sale
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
                                 <p className="text-sm text-gray-500">
                                     Check this box to make the event active immediately
                                 </p>
@@ -453,7 +520,7 @@ export const EditEvent = () => {
                                 </div>
                             </div>
 
-                            <div className="md:col-span-2 space-y-4 pt-4 border-t border-gray-100">
+                            <div className="md:col-span-3 space-y-4 pt-4 border-t border-gray-100">
                                 <label className="block font-medium text-gray-700">
                                     Event Image
                                 </label>
@@ -499,6 +566,7 @@ export const EditEvent = () => {
                             </div>
                         </div>
                     </div>
+
                     <div className="bg-white border border-gray-200 rounded-2xl p-6">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-gray-100">
                             <div>
